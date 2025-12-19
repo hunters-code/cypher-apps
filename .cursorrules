@@ -1,0 +1,312 @@
+# Cypher Frontend Development Rules - shadcn UI
+
+## Project Overview
+Cypher is a blockchain wallet application focused on privacy using Stealth Address technology. The frontend uses Next.js 16, React 19, TypeScript, Tailwind CSS, and shadcn/ui for UI components.
+
+## Tech Stack
+- **Framework**: Next.js 16 (App Router)
+- **React**: 19.2.1
+- **TypeScript**: Strict mode enabled
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui
+- **Blockchain**: Wagmi + Viem + Ethers.js
+- **Authentication**: Privy.io
+- **Network**: Base L2
+
+## shadcn/ui Component Guidelines
+
+### Component Installation
+- Use `npx shadcn@latest add [component-name]` to add components
+- Components are stored in `components/ui/`
+- Do not modify shadcn components directly, use composition or wrapper
+
+### Component Structure
+```
+components/
+  ui/              # shadcn components (auto-generated)
+  features/         # Feature-specific components
+    auth/
+    transactions/
+    dashboard/
+  shared/          # Reusable components
+  layouts/         # Layout components
+```
+
+### Preferred shadcn Components
+- **Forms**: `Button`, `Input`, `Label`, `Select`, `Checkbox`, `RadioGroup`
+- **Data Display**: `Card`, `Table`, `Badge`, `Avatar`
+- **Feedback**: `Dialog`, `Alert`, `Toast`, `Skeleton`
+- **Navigation**: `Tabs`, `DropdownMenu`, `Sheet`
+- **Layout**: `Separator`, `ScrollArea`
+
+## Code Style & Patterns
+
+### TypeScript
+- Use strict TypeScript
+- Avoid `any`, use proper types or `unknown`
+- Export types/interfaces from separate files if used in multiple files
+- Use type inference when possible
+
+### React Patterns
+- Use Server Components by default, Client Components only when needed
+- Add `"use client"` at the top of the file for Client Components
+- Use `async/await` for Server Components
+- Use hooks with `use` prefix (custom hooks)
+
+### Component Naming
+- PascalCase for components: `TransactionList`, `UserDashboard`
+- camelCase for functions: `formatAmount`, `validateUsername`
+- kebab-case for files: `transaction-list.tsx`, `user-dashboard.tsx`
+
+### File Structure
+```typescript
+// Component file structure
+import { ... } from "@/components/ui/..."
+import { ... } from "@/lib/utils"
+
+interface ComponentProps {
+  // Props definition
+}
+
+export function ComponentName({ prop1, prop2 }: ComponentProps) {
+  // Component logic
+  return (
+    // JSX
+  )
+}
+```
+
+## UI/UX Patterns from Documentation
+
+### Transaction History UI
+- Use `Card` for transaction items
+- `Badge` for status (PENDING, CONFIRMED, FAILED)
+- `Table` or virtual scrolling for long lists
+- `Dialog` for transaction details
+- `Input` with icon for search/filter
+
+### Authentication UI
+- `Button` for login actions
+- `Input` for username/email with real-time validation
+- `Alert` for error messages
+- `Skeleton` for loading states
+- `Dialog` or `Sheet` for modals
+
+### Dashboard UI
+- `Card` for statistics boxes
+- `Tabs` for navigation
+- `Badge` for indicators
+- `Separator` for visual division
+
+### Forms
+- Use `Label` with `Input`/`Select`
+- `Button` with loading state for submit
+- `Alert` for validation errors
+- Real-time validation feedback
+
+## Styling Guidelines
+
+### Tailwind CSS
+- Use utility classes, avoid custom CSS unless necessary
+- Use CSS variables for theming (already setup in globals.css)
+- Dark mode: use `dark:` prefix
+- Responsive: mobile-first approach
+
+### Color Scheme
+- Background: `bg-background`
+- Foreground: `text-foreground`
+- Use semantic colors from shadcn theme
+
+### Spacing
+- Use spacing scale: `p-4`, `gap-4`, `space-y-4`
+- Consistent spacing within related components
+
+## State Management
+
+### Client State
+- `useState` for local state
+- `useEffect` for side effects
+- Custom hooks for reusable logic
+- Context API for global state (if needed)
+
+### Server State
+- Server Components for data fetching
+- `async/await` in Server Components
+- Loading states with `Suspense`
+
+## Error Handling
+
+### UI Error States
+- Use `Alert` component for error messages
+- `Toast` for non-blocking notifications
+- Fallback UI for error boundaries
+- Loading states with `Skeleton`
+
+### Error Patterns
+```typescript
+try {
+  // operation
+} catch (error) {
+  if (error instanceof Error) {
+    // Handle specific error
+  }
+  // Show user-friendly message
+}
+```
+
+## Performance Best Practices
+
+### Component Optimization
+- Use `React.memo` for expensive components
+- Lazy load with `dynamic` import for large components
+- Virtual scrolling for long lists (transaction history)
+- Code splitting with Next.js dynamic imports
+
+### Data Fetching
+- Cache data in localStorage for instant display
+- Background sync for updates
+- Pagination for large datasets
+- Debounce for search/filter inputs
+
+## Accessibility
+
+### shadcn Components
+- shadcn components are accessible by default
+- Do not remove ARIA attributes
+- Add `aria-label` when needed
+
+### Best Practices
+- Semantic HTML
+- Keyboard navigation support
+- Focus management
+- Screen reader friendly
+
+## Blockchain Integration Patterns
+
+### Wallet Connection
+- Use Privy hooks: `usePrivy()`, `useWallets()`
+- Loading states when connecting
+- Error handling for connection failures
+
+### Transaction Display
+- Format amounts with proper decimals
+- Show transaction status with `Badge`
+- Link to block explorer
+- Copy-to-clipboard for addresses/hashes
+
+## File Organization
+
+### Import Order
+1. React/Next.js imports
+2. Third-party libraries
+3. shadcn/ui components
+4. Local components
+5. Utils/helpers
+6. Types/interfaces
+7. Constants
+
+### Example
+```typescript
+import { useState } from "react"
+import { usePrivy } from "@privy-io/react-auth"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { TransactionList } from "@/components/features/transactions/transaction-list"
+import { formatAmount } from "@/lib/utils"
+import type { Transaction } from "@/types/transaction"
+```
+
+## Testing Considerations
+
+### Component Testing
+- Test user interactions
+- Test error states
+- Test loading states
+- Test responsive behavior
+
+## Common Patterns from Documentation
+
+### Transaction List Item
+```typescript
+<Card>
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-4">
+      <Badge variant={type === "SEND" ? "destructive" : "default"}>
+        {type}
+      </Badge>
+      <span>{amount} {token}</span>
+    </div>
+    <span className="text-sm text-muted-foreground">
+      {timeAgo}
+    </span>
+  </div>
+</Card>
+```
+
+### Filter Panel
+```typescript
+<div className="flex gap-4">
+  <Select>
+    <SelectTrigger>
+      <SelectValue placeholder="All Types" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">All Types</SelectItem>
+      <SelectItem value="send">Sent</SelectItem>
+      <SelectItem value="receive">Received</SelectItem>
+    </SelectContent>
+  </Select>
+  <Input placeholder="Search..." />
+</div>
+```
+
+### Loading State
+```typescript
+<div className="space-y-4">
+  {isLoading ? (
+    <>
+      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-20 w-full" />
+    </>
+  ) : (
+    <TransactionList transactions={transactions} />
+  )}
+</div>
+```
+
+## Do's and Don'ts
+
+### Do's
+✅ Use shadcn components for consistency
+✅ Follow TypeScript strict mode
+✅ Use Server Components by default
+✅ Implement loading and error states
+✅ Optimize for performance
+✅ Test responsive design
+✅ Follow accessibility guidelines
+
+### Don'ts
+❌ Do not modify shadcn components directly
+❌ Do not use `any` type
+❌ Do not hardcode styles, use Tailwind
+❌ Do not skip error handling
+❌ Do not forget loading states
+❌ Do not ignore accessibility
+
+## Environment Setup
+
+### Required Environment Variables
+```bash
+NEXT_PUBLIC_PRIVY_APP_ID=priv-xxxx-xxxx-xxxx
+NEXT_PUBLIC_REGISTRY_ADDRESS=0x...
+NEXT_PUBLIC_BASE_RPC_URL=https://mainnet.base.org
+NEXT_PUBLIC_ANNOUNCEMENT_CONTRACT=0x...
+```
+
+## Notes
+- Always refer to Notion documentation for detailed implementation
+- UI components must follow patterns from the documentation
+- Prioritize user experience and performance
+- Maintain consistency with shadcn design system
+
