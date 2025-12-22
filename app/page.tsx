@@ -1,22 +1,23 @@
-import Link from "next/link";
-import { Logo } from "@/components/shared/logo";
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { CryptoWallet } from "@/components/icons/crypto-wallet";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.push("/auth");
+  };
+
   return (
-    <div className="flex flex-col items-center gap-8 text-center">
-      <Logo />
-      <h1 className="text-4xl font-bold">CYPHER</h1>
-      <p className="text-lg text-muted-foreground">Your Private Crypto Wallet</p>
-      
-      <Link href="/auth" className="w-full">
-        <Button size="lg" className="w-full rounded-full">Login / Sign Up</Button>
-      </Link>
-      
-      <div className="w-full space-y-3 text-left mt-8">
-        <p className="text-sm">🔒 Private transfers with Stealth Addresses</p>
-        <p className="text-sm">👤 Send using @username</p>
-        <p className="text-sm">🔐 Non-custodial - You own your keys</p>
+    <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">
+      <CryptoWallet width={200} height={200} />
+      <div className="flex flex-col items-center gap-12 text-center">
+        <h1 className="text-4xl font-bold">Your crypto, truly private</h1>
+        <p className="text-muted-foreground">Enjoy cash-level privacy on the blockchain. Send to usernames without exposing your transaction history or balance.</p>
+        <Button size="lg" className="w-full" onClick={handleGetStarted}>Get Started</Button>
       </div>
     </div>
   );

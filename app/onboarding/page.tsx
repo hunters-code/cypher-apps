@@ -26,7 +26,7 @@ export default function OnboardingPage() {
           <Input
             id="username"
             type="text"
-            placeholder="@nashirjamali"
+            placeholder="@username"
           />
           <p className="text-xs text-muted-foreground">✓ Available</p>
         </div>
