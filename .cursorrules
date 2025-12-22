@@ -52,6 +52,7 @@ You are working on Cypher, a non-custodial crypto wallet that prioritizes privac
     "plugin:react-hooks/recommended",
     "prettier"
   ],
+  "plugins": ["import"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-unused-vars": "error",
@@ -59,10 +60,92 @@ You are working on Cypher, a non-custodial crypto wallet that prioritizes privac
     "react-hooks/exhaustive-deps": "warn",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "prefer-const": "error",
-    "no-var": "error"
+    "no-var": "error",
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["parent", "sibling"],
+          "index",
+          "type"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "next/**",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "@/**",
+            "group": "internal",
+            "position": "after"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["react", "next"],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/no-duplicates": "error",
+    "import/no-unresolved": "off"
   }
 }
 ```
+
+### Import Order Rules
+**Always follow this import order:**
+
+1. **React and Next.js** (external, first)
+2. **Other external packages** (alphabetically)
+3. **Internal absolute imports** (`@/...`) (alphabetically)
+4. **Relative imports** (`./...`, `../...`) (alphabetically)
+5. **Type-only imports** (use `import type`)
+
+**Example:**
+```typescript
+// ✅ GOOD - Correct import order
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
+import { ethers } from 'ethers';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { formatCurrency } from '@/lib/utils/format';
+import { useWallet } from '@/hooks/useWallet';
+
+import { TransactionCard } from './TransactionCard';
+import { TransactionList } from './TransactionList';
+
+import type { Transaction } from '@/types/transaction';
+
+// ❌ BAD - Incorrect import order
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { TransactionCard } from './TransactionCard';
+import { useRouter } from 'next/navigation';
+```
+
+**Rules:**
+- Separate groups with blank lines
+- Alphabetize imports within each group
+- Use `import type` for type-only imports
+- React and Next.js imports should come first
+- Internal imports (`@/...`) come after external packages
+- Relative imports come last
 
 ### TypeScript Rules
 - **Always use strict TypeScript**
