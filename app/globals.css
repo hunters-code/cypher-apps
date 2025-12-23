@@ -123,3 +123,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+#reader {
+  position: relative;
+}
+
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+#reader__dashboard {
+  display: none !important;
+}
+
+#reader__camera_selection {
+  display: none !important;
+}
+
+#reader__scan_region {
+  border: none !important;
+}
+
+#reader__scan_region_highlight {
+  display: none !important;
+}

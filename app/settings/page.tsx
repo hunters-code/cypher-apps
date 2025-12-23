@@ -1,98 +1,273 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import {
+  Item,
+  ItemGroup,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemSeparator,
+} from "@/components/ui/item";
+import {
+  Copy,
+  Check,
+  User,
+  Wallet,
+  Shield,
+  Lock,
+  Bell,
+  DollarSign,
+  HelpCircle,
+  FileText,
+  LogOut,
+  Eye,
+  EyeOff,
+  ChevronRight,
+} from "lucide-react";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showAddress, setShowAddress] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedUsername, setCopiedUsername] = useState(false);
+
+  const username = "@nashirjamali";
+  const walletAddress = "0x9a3d6c5f8e2b1a7c4d9e8f3b2a1c6d5e4f3a2b1c";
+
+  const handleBack = () => {
+    router.push("/dashboard");
+  };
+
+  const handleCopyAddress = async () => {
+    await navigator.clipboard.writeText(walletAddress);
+    setCopiedAddress(true);
+    setTimeout(() => setCopiedAddress(false), 2000);
+  };
+
+  const handleCopyUsername = async () => {
+    await navigator.clipboard.writeText(username);
+    setCopiedUsername(true);
+    setTimeout(() => setCopiedUsername(false), 2000);
+  };
+
+  const formatAddress = (address: string): string => {
+    if (showAddress) {
+      return address;
+    }
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const handleLogout = () => {
+    router.push("/");
+  };
+
   return (
-    <div className="w-full space-y-6">
-      <div className="flex items-center justify-between">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="sm">←</Button>
-        </Link>
-        <h1 className="text-xl font-bold">Settings</h1>
-        <div className="w-10"></div>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <h2 className="font-semibold mb-2">Account</h2>
-          <div className="space-y-2">
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium">@nashirjamali</p>
-                <p className="text-xs text-muted-foreground">Change username</p>
-              </div>
-              <Button variant="ghost" size="sm">→</Button>
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col gap-6 w-full px-4 py-8">
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">Account</h2>
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50 w-full"
+                onClick={handleCopyUsername}
+              >
+                <ItemMedia variant="icon">
+                  <User className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle className="text-left">{username}</ItemTitle>
+                  <ItemDescription className="text-left">
+                    Username
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  {copiedUsername ? (
+                    <Check className="h-4 w-4 text-primary" />
+                  ) : (
+                    <Copy className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </ItemActions>
+              </Item>
+              <ItemSeparator />
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50 w-full"
+                onClick={handleCopyAddress}
+              >
+                <ItemMedia variant="icon">
+                  <Wallet className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle className="text-left">
+                    {formatAddress(walletAddress)}
+                  </ItemTitle>
+                  <ItemDescription className="text-left">
+                    Wallet Address
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleCopyAddress}
+                  >
+                    {copiedAddress ? (
+                      <Check className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </ItemActions>
+              </Item>
             </div>
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium text-xs">0x9a3d6c5f8e2b1a7c4d9e...</p>
-                <p className="text-xs text-muted-foreground">View wallet address</p>
-              </div>
-              <Button variant="ghost" size="sm">→</Button>
+
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">
+                Security
+              </h2>
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50 w-full"
+              >
+                <ItemMedia variant="icon">
+                  <Shield className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>Backup & Recovery</ItemTitle>
+                  <ItemDescription>Save your wallet securely</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+              <ItemSeparator />
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50 w-full"
+              >
+                <ItemMedia variant="icon">
+                  <Lock className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>Privacy Settings</ItemTitle>
+                  <ItemDescription>
+                    Manage stealth address preferences
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">
+                Preferences
+              </h2>
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50"
+              >
+                <ItemMedia variant="icon">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>Currency</ItemTitle>
+                  <ItemDescription>USD - United States Dollar</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+              <ItemSeparator />
+              <Item variant="default">
+                <ItemMedia variant="icon">
+                  <Bell className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>Notifications</ItemTitle>
+                  <ItemDescription>Transaction alerts</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Switch
+                    checked={notificationsEnabled}
+                    onCheckedChange={setNotificationsEnabled}
+                  />
+                </ItemActions>
+              </Item>
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-foreground">About</h2>
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50"
+              >
+                <ItemMedia variant="icon">
+                  <HelpCircle className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>Help & Support</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+              <ItemSeparator />
+              <Item
+                variant="default"
+                className="cursor-pointer hover:bg-muted/50"
+              >
+                <ItemMedia variant="icon">
+                  <FileText className="h-4 w-4 text-primary" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>Terms & Privacy</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+              <ItemSeparator />
+              <Item variant="default">
+                <ItemContent>
+                  <ItemDescription>Version 1.0.0</ItemDescription>
+                </ItemContent>
+              </Item>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={handleBack}
+              >
+                Back
+              </Button>
             </div>
           </div>
         </div>
-
-        <div>
-          <h2 className="font-semibold mb-2">Security</h2>
-          <div className="space-y-2">
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium">Backup & Recovery</p>
-                <p className="text-xs text-muted-foreground">Save your wallet securely</p>
-              </div>
-              <Button variant="ghost" size="sm">→</Button>
-            </div>
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium">Privacy Settings</p>
-                <p className="text-xs text-muted-foreground">Manage stealth address preferences</p>
-              </div>
-              <Button variant="ghost" size="sm">→</Button>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="font-semibold mb-2">Preferences</h2>
-          <div className="space-y-2">
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium">Currency</p>
-                <p className="text-xs text-muted-foreground">USD - United States Dollar</p>
-              </div>
-              <Button variant="ghost" size="sm">→</Button>
-            </div>
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium">Notifications</p>
-                <p className="text-xs text-muted-foreground">Transaction alerts</p>
-              </div>
-              <Button variant="outline" size="sm">Toggle ON</Button>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="font-semibold mb-2">About</h2>
-          <div className="space-y-2">
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <p className="font-medium">Help & Support</p>
-              <Button variant="ghost" size="sm">→</Button>
-            </div>
-            <div className="border rounded-lg p-4 flex items-center justify-between">
-              <p className="font-medium">Terms & Privacy</p>
-              <Button variant="ghost" size="sm">→</Button>
-            </div>
-            <div className="border rounded-lg p-4">
-              <p className="text-sm text-muted-foreground">Version 1.0.0</p>
-            </div>
-          </div>
-        </div>
-
-        <Button variant="destructive" className="w-full rounded-full">Logout</Button>
       </div>
     </div>
   );
 }
-

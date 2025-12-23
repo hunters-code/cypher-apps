@@ -1,81 +1,268 @@
-import Link from "next/link";
+"use client";
+
+import { useState, useMemo, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Search, MoreVertical, ChevronDown } from "lucide-react";
+import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
+
+interface Transaction {
+  id: string;
+  type: "SEND" | "RECEIVE";
+  username: string;
+  amount: string;
+  token: string;
+  timestamp: string;
+  isPrivate?: boolean;
+  dateGroup: string;
+}
+
+const allMockTransactions: Transaction[] = [
+  {
+    id: "1",
+    type: "SEND",
+    username: "alice",
+    amount: "1.5",
+    token: "ETH",
+    timestamp: "2 hours ago",
+    isPrivate: true,
+    dateGroup: "Today",
+  },
+  {
+    id: "2",
+    type: "RECEIVE",
+    username: "bob",
+    amount: "0.5",
+    token: "ETH",
+    timestamp: "5 hours ago",
+    isPrivate: false,
+    dateGroup: "Today",
+  },
+  {
+    id: "3",
+    type: "RECEIVE",
+    username: "charlie",
+    amount: "100",
+    token: "USDC",
+    timestamp: "1 day ago",
+    isPrivate: true,
+    dateGroup: "Yesterday",
+  },
+  {
+    id: "4",
+    type: "SEND",
+    username: "david",
+    amount: "0.1",
+    token: "ETH",
+    timestamp: "2 days ago",
+    isPrivate: false,
+    dateGroup: "2 days ago",
+  },
+  {
+    id: "5",
+    type: "RECEIVE",
+    username: "eve",
+    amount: "50",
+    token: "USDC",
+    timestamp: "3 days ago",
+    isPrivate: true,
+    dateGroup: "3 days ago",
+  },
+  {
+    id: "6",
+    type: "SEND",
+    username: "frank",
+    amount: "2.0",
+    token: "ETH",
+    timestamp: "4 days ago",
+    isPrivate: true,
+    dateGroup: "4 days ago",
+  },
+];
+
+const ITEMS_PER_PAGE = 5;
 
 export default function HistoryPage() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("All Types");
+  const [selectedToken, setSelectedToken] = useState<string>("All Tokens");
+  const [showSearch, setShowSearch] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  const filteredTransactions = useMemo(() => {
+    let filtered = allMockTransactions;
+
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (tx) =>
+          tx.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          tx.amount.includes(searchQuery) ||
+          tx.token.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedType !== "All Types") {
+      filtered = filtered.filter((tx) => tx.type === selectedType);
+    }
+
+    if (selectedToken !== "All Tokens") {
+      filtered = filtered.filter((tx) => tx.token === selectedToken);
+    }
+
+    return filtered;
+  }, [searchQuery, selectedType, selectedToken]);
+
+  const displayedTransactions = useMemo(() => {
+    return filteredTransactions.slice(0, displayedCount);
+  }, [filteredTransactions, displayedCount]);
+
+  const groupedTransactions = useMemo(() => {
+    const groups: Record<string, Transaction[]> = {};
+    displayedTransactions.forEach((tx) => {
+      if (!groups[tx.dateGroup]) {
+        groups[tx.dateGroup] = [];
+      }
+      groups[tx.dateGroup].push(tx);
+    });
+    return groups;
+  }, [displayedTransactions]);
+
+  const hasMore = displayedCount < filteredTransactions.length;
+
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_PAGE);
+  }, [searchQuery, selectedType, selectedToken]);
+
+  useEffect(() => {
+    if (!hasMore || !loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredTransactions.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [hasMore, filteredTransactions.length]);
+
+  const handleBack = () => {
+    router.push("/dashboard");
+  };
+
+  const handleTransactionClick = (transaction: Transaction) => {
+    router.push(`/transaction/${transaction.id}`);
+  };
+
   return (
-    <div className="w-full space-y-6">
-      <div className="flex items-center justify-between">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="sm">←</Button>
-        </Link>
-        <h1 className="text-xl font-bold">Transaction History</h1>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="icon">🔍</Button>
-          <Button variant="ghost" size="icon">⋯</Button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1">All Types ▼</Button>
-          <Button variant="outline" size="sm" className="flex-1">All Tokens ▼</Button>
-        </div>
-
-        <Input placeholder="Search transactions..." />
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="font-semibold">Today</h2>
-        <div className="space-y-2">
-          <div className="border rounded-lg p-4 space-y-1">
-            <div className="flex items-center gap-2">
-              <span>↑</span>
-              <span className="font-medium">Sent</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">to @alice</span>
-              <span className="font-medium">-1.5 ETH</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs">🔒 Private</span>
-              <span className="text-xs text-muted-foreground">2 hours ago</span>
-            </div>
-          </div>
-
-          <div className="border rounded-lg p-4 space-y-1">
-            <div className="flex items-center gap-2">
-              <span>↓</span>
-              <span className="font-medium">Received</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">from @bob</span>
-              <span className="font-medium">+0.5 ETH</span>
-            </div>
-            <span className="text-xs text-muted-foreground">5 hours ago</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="font-semibold">Yesterday</h2>
-        <div className="border rounded-lg p-4 space-y-1">
-          <div className="flex items-center gap-2">
-            <span>↓</span>
-            <span className="font-medium">Received</span>
-          </div>
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col gap-6 w-full px-4 py-8">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">from @charlie</span>
-            <span className="font-medium">+100 USDC</span>
+            <h1 className="text-3xl font-bold text-foreground">Transaction History</h1>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSearch(!showSearch)}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs">🔒 Private</span>
-            <span className="text-xs text-muted-foreground">1 day ago</span>
+
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  const types = ["All Types", "SEND", "RECEIVE"];
+                  const currentIndex = types.indexOf(selectedType);
+                  setSelectedType(types[(currentIndex + 1) % types.length]);
+                }}
+              >
+                {selectedType} <ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  const tokens = ["All Tokens", "ETH", "USDC"];
+                  const currentIndex = tokens.indexOf(selectedToken);
+                  setSelectedToken(tokens[(currentIndex + 1) % tokens.length]);
+                }}
+              >
+                {selectedToken} <ChevronDown className="ml-1 h-3 w-3" />
+              </Button>
+            </div>
+
+            {showSearch && (
+              <Input
+                placeholder="Search transactions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            )}
+          </div>
+
+          <div className="space-y-6">
+            {Object.entries(groupedTransactions).map(([dateGroup, transactions]) => (
+              <div key={dateGroup} className="space-y-4">
+                <h2 className="font-semibold text-foreground">{dateGroup}</h2>
+                <div className="space-y-2">
+                  {transactions.map((transaction) => (
+                    <RecentActivityItem
+                      key={transaction.id}
+                      type={transaction.type}
+                      username={transaction.username}
+                      amount={transaction.amount}
+                      token={transaction.token}
+                      timestamp={transaction.timestamp}
+                      isPrivate={transaction.isPrivate}
+                      onClick={() => handleTransactionClick(transaction)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {filteredTransactions.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-muted-foreground">No transactions found</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Try adjusting your filters
+                </p>
+              </div>
+            )}
+
+            {hasMore && (
+              <div ref={loadMoreRef} className="flex justify-center py-4">
+                <div className="text-sm text-muted-foreground">Loading more...</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <Button variant="outline" className="w-full">Load More</Button>
+      <div className="flex flex-col gap-3 w-full px-4 py-4 bg-background border-t border-border shrink-0">
+        <Button variant="secondary" className="w-full" onClick={handleBack}>
+          Back
+        </Button>
+      </div>
     </div>
   );
 }
