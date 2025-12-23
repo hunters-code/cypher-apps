@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
+
 import { RecentActivityItem } from "./RecentActivityItem";
 
 export interface RecentActivity {
@@ -55,4 +57,3 @@ export function RecentActivityList({
     </div>
   );
 }
-

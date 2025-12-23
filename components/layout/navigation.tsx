@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { Menu } from "lucide-react";
+
+import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,7 +16,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Logo } from "@/components/shared/logo";
 import { cn } from "@/lib/utils";
 
 interface NavigationProps {
@@ -102,7 +105,9 @@ export function Navigation({ username, showSettings = true }: NavigationProps) {
             {username && (
               <div className="mt-auto pt-8 border-t border-border">
                 <div className="px-4 py-2">
-                  <p className="text-sm font-medium text-foreground">{username}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {username}
+                  </p>
                   <p className="text-xs text-muted-foreground">Wallet</p>
                 </div>
               </div>
@@ -113,4 +118,3 @@ export function Navigation({ username, showSettings = true }: NavigationProps) {
     </nav>
   );
 }
-

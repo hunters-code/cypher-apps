@@ -1,9 +1,22 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
+
+import { useRouter, useParams } from "next/navigation";
+
+import {
+  ArrowUp,
+  ArrowDown,
+  Lock,
+  Copy,
+  Check,
+  ExternalLink,
+  CheckCircle2,
+  Clock,
+  XCircle,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, Lock, Copy, Check, ExternalLink, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
 interface TransactionDetail {
@@ -139,7 +152,10 @@ export default function TransactionDetailPage() {
   };
 
   const handleViewOnExplorer = () => {
-    window.open(`https://basescan.org/tx/${transaction.transactionHash}`, "_blank");
+    window.open(
+      `https://basescan.org/tx/${transaction.transactionHash}`,
+      "_blank"
+    );
   };
 
   const handleBack = () => {
@@ -176,7 +192,9 @@ export default function TransactionDetailPage() {
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full px-4 py-8">
-          <h1 className="text-3xl font-bold text-foreground">Transaction Details</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            Transaction Details
+          </h1>
 
           <div className="flex flex-col items-center gap-4 p-6 border rounded-lg bg-card">
             <div className={`p-3 rounded-full ${iconBg}`}>
@@ -192,7 +210,8 @@ export default function TransactionDetailPage() {
                 )}
               </div>
               <div className={`text-3xl font-bold ${amountColor}`}>
-                {prefix}{formatCryptoAmount(transaction.amount)} {transaction.token}
+                {prefix}
+                {formatCryptoAmount(transaction.amount)} {transaction.token}
               </div>
               <div className="text-sm text-muted-foreground">
                 ≈ {formatUSDValue(transaction.usdValue)}
@@ -213,11 +232,15 @@ export default function TransactionDetailPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Time</span>
-                <span className="text-sm font-medium">{transaction.dateTime}</span>
+                <span className="text-sm font-medium">
+                  {transaction.dateTime}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Block</span>
-                <span className="text-sm font-medium">#{transaction.blockNumber}</span>
+                <span className="text-sm font-medium">
+                  #{transaction.blockNumber}
+                </span>
               </div>
             </div>
 
@@ -270,7 +293,9 @@ export default function TransactionDetailPage() {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Transaction Hash</span>
+                <span className="text-sm text-muted-foreground">
+                  Transaction Hash
+                </span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono text-foreground truncate max-w-[120px]">
                     {formatAddress(transaction.transactionHash)}
@@ -292,16 +317,21 @@ export default function TransactionDetailPage() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Gas Fee</span>
                 <span className="text-sm font-medium">
-                  {formatCryptoAmount(transaction.gasFee)} ETH ({formatUSDValue(transaction.gasFeeUSD)})
+                  {formatCryptoAmount(transaction.gasFee)} ETH (
+                  {formatUSDValue(transaction.gasFeeUSD)})
                 </span>
               </div>
               {transaction.isPrivate && (
                 <div className="flex items-center justify-between pt-2 border-t">
                   <div className="flex items-center gap-2">
                     <Lock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Privacy Mode</span>
+                    <span className="text-sm text-muted-foreground">
+                      Privacy Mode
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-primary">Enabled</span>
+                  <span className="text-sm font-medium text-primary">
+                    Enabled
+                  </span>
                 </div>
               )}
             </div>
@@ -326,4 +356,3 @@ export default function TransactionDetailPage() {
     </div>
   );
 }
-

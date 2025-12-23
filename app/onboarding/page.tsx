@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ export default function OnboardingPage() {
     }
 
     const usernameWithoutAt = trimmedValue.replace(/^@+/, "");
-    
+
     if (usernameWithoutAt.length < 3) {
       setError("Username must be at least 3 characters");
       return false;
@@ -58,10 +59,9 @@ export default function OnboardingPage() {
     setError("");
 
     try {
-      const usernameWithPrefix = `@${username.trim()}`;
       await new Promise((resolve) => setTimeout(resolve, 500));
       router.push("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -75,7 +75,8 @@ export default function OnboardingPage() {
           Your private identity, your way
         </h1>
         <p className="text-base text-muted-foreground text-left">
-          Create a unique username to receive crypto privately. Your identity stays hidden while you stay connected.
+          Create a unique username to receive crypto privately. Your identity
+          stays hidden while you stay connected.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6 w-full">

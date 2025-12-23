@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { Settings, Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+
+import { Settings, Bell } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   username: string;

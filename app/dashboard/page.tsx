@@ -1,8 +1,8 @@
-import { AssetList } from "@/components/wallet/AssetList";
-import { BalanceDisplay } from "@/components/wallet/BalanceDisplay";
-import { ActionsButton } from "@/components/wallet/ActionsButton";
 import { Header } from "@/components/layout/Header";
 import { RecentActivityList } from "@/components/transaction/RecentActivityList";
+import { ActionsButton } from "@/components/wallet/ActionsButton";
+import { AssetList } from "@/components/wallet/AssetList";
+import { BalanceDisplay } from "@/components/wallet/BalanceDisplay";
 
 export default function DashboardPage() {
   return (

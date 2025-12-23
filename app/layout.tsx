@@ -1,7 +1,10 @@
-import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
+
 import { MobileContainer } from "@/components/layout/mobile-container";
+
+import type { Metadata } from "next";
+
+import "./globals.css";
 
 const satoshi = localFont({
   src: [
@@ -72,7 +75,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${satoshi.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body
+        className={`${satoshi.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
         <MobileContainer>{children}</MobileContainer>
       </body>
     </html>

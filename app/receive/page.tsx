@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { QrCode, Copy, Check, Share2, Lock } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { QrCode, Copy, Check, Share2, Lock } from "lucide-react";
 
 export default function ReceivePage() {
   const router = useRouter();
@@ -65,7 +68,9 @@ export default function ReceivePage() {
                     <div className="p-3 sm:p-4 bg-background rounded-lg">
                       <QrCode className="h-24 w-24 sm:h-32 sm:w-32 text-foreground" />
                     </div>
-                    <p className="text-sm font-medium text-foreground">{username}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {username}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -133,10 +138,13 @@ export default function ReceivePage() {
                   <Lock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Private by Default</span>
+                      <span className="text-sm font-medium">
+                        Private by Default
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground text-left">
-                      Funds sent to your username will use stealth addresses and remain private.
+                      Funds sent to your username will use stealth addresses and
+                      remain private.
                     </p>
                   </div>
                 </div>
@@ -158,4 +166,3 @@ export default function ReceivePage() {
     </div>
   );
 }
-

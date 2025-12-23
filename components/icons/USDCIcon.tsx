@@ -1,5 +1,3 @@
-import { LucideIcon } from "lucide-react";
-
 export function USDCIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -23,4 +21,3 @@ export function USDCIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-

@@ -1,4 +1,5 @@
 import { ArrowUp, ArrowDown, Lock } from "lucide-react";
+
 import { formatCryptoAmount } from "@/lib/utils/format";
 
 interface RecentActivityItemProps {
@@ -42,20 +43,20 @@ export function RecentActivityItem({
               <span className="text-sm font-medium">
                 {isSend ? "Sent to" : "Received from"} @{username}
               </span>
-              {isPrivate && (
-                <Lock className="h-3 w-3 text-muted-foreground" />
-              )}
+              {isPrivate && <Lock className="h-3 w-3 text-muted-foreground" />}
             </div>
             <span className="text-xs text-muted-foreground">{timestamp}</span>
           </div>
         </div>
         <div className="flex flex-col items-end gap-0.5">
-          <span className={`text-sm font-medium ${isSend ? "text-destructive" : "text-green-600"}`}>
-            {prefix}{formattedAmount} {token}
+          <span
+            className={`text-sm font-medium ${isSend ? "text-destructive" : "text-green-600"}`}
+          >
+            {prefix}
+            {formattedAmount} {token}
           </span>
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { Html5Qrcode } from "html5-qrcode";
-import { Button } from "@/components/ui/button";
 import { QrCode, ArrowRight } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 export default function ScanPage() {
   const router = useRouter();
@@ -37,11 +40,9 @@ export default function ScanPage() {
           () => {}
         );
         isScannerRunningRef.current = true;
-        (true);
       } catch (err) {
         console.error("Error starting camera:", err);
         isScannerRunningRef.current = false;
-        (false);
       }
     };
 

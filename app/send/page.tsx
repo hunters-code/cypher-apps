@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { QrCode, Lock } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { QrCode, Lock } from "lucide-react";
 
 export default function SendPage() {
   const router = useRouter();
@@ -44,7 +47,8 @@ export default function SendPage() {
           Send Crypto
         </h1>
         <p className="text-base text-muted-foreground text-left w-full">
-          Send crypto privately to any username or address. Your transaction stays hidden.
+          Send crypto privately to any username or address. Your transaction
+          stays hidden.
         </p>
 
         <div className="space-y-6 w-full">
@@ -97,9 +101,15 @@ export default function SendPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" size="sm">25%</Button>
-            <Button variant="outline" size="sm">50%</Button>
-            <Button variant="outline" size="sm">Max</Button>
+            <Button variant="outline" size="sm">
+              25%
+            </Button>
+            <Button variant="outline" size="sm">
+              50%
+            </Button>
+            <Button variant="outline" size="sm">
+              Max
+            </Button>
           </div>
 
           <div className="space-y-2">
@@ -107,7 +117,10 @@ export default function SendPage() {
               <div className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
                 <div className="flex flex-col">
-                  <Label htmlFor="privacy" className="text-sm font-medium cursor-pointer">
+                  <Label
+                    htmlFor="privacy"
+                    className="text-sm font-medium cursor-pointer"
+                  >
                     Privacy Mode
                   </Label>
                   <p className="text-xs text-muted-foreground">
@@ -148,4 +161,3 @@ export default function SendPage() {
     </div>
   );
 }
-

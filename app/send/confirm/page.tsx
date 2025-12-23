@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+
 import { Lock, ArrowRight } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
 export default function SendConfirmPage() {
@@ -23,7 +26,7 @@ export default function SendConfirmPage() {
     setIsLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      
+
       const params = new URLSearchParams({
         recipient,
         amount,
@@ -69,15 +72,21 @@ export default function SendConfirmPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">USD Value</span>
-              <span className="text-sm font-medium">{formatUSDValue(usdValue)}</span>
+              <span className="text-sm font-medium">
+                {formatUSDValue(usdValue)}
+              </span>
             </div>
             {isPrivate && (
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Privacy Mode</span>
+                  <span className="text-sm text-muted-foreground">
+                    Privacy Mode
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-primary">Enabled</span>
+                <span className="text-sm font-medium text-primary">
+                  Enabled
+                </span>
               </div>
             )}
           </div>
@@ -92,7 +101,8 @@ export default function SendConfirmPage() {
             <div className="flex items-center justify-between pt-2 border-t border-border/50">
               <span className="text-sm font-medium">Total</span>
               <span className="text-sm font-bold">
-                {formatCryptoAmount(parseFloat(amount) + parseFloat(fee))} {token}
+                {formatCryptoAmount(parseFloat(amount) + parseFloat(fee))}{" "}
+                {token}
               </span>
             </div>
           </div>
@@ -100,11 +110,7 @@ export default function SendConfirmPage() {
       </div>
 
       <div className="flex flex-col gap-4 w-full">
-        <Button
-          className="w-full"
-          onClick={handleConfirm}
-          disabled={isLoading}
-        >
+        <Button className="w-full" onClick={handleConfirm} disabled={isLoading}>
           {isLoading ? (
             "Processing..."
           ) : (
@@ -114,11 +120,15 @@ export default function SendConfirmPage() {
             </>
           )}
         </Button>
-        <Button variant="secondary" className="w-full" onClick={handleBack} disabled={isLoading}>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={handleBack}
+          disabled={isLoading}
+        >
           Back
         </Button>
       </div>
     </div>
   );
 }
-

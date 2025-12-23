@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { Search, ChevronDown } from "lucide-react";
+
+import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MoreVertical, ChevronDown } from "lucide-react";
-import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
 
 interface Transaction {
   id: string;
@@ -133,26 +136,31 @@ export default function HistoryPage() {
   const hasMore = displayedCount < filteredTransactions.length;
 
   useEffect(() => {
+    // Reset displayed count when filters change
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayedCount(ITEMS_PER_PAGE);
   }, [searchQuery, selectedType, selectedToken]);
 
   useEffect(() => {
     if (!hasMore || !loadMoreRef.current) return;
 
+    const currentRef = loadMoreRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredTransactions.length));
+          setDisplayedCount((prev) =>
+            Math.min(prev + ITEMS_PER_PAGE, filteredTransactions.length)
+          );
         }
       },
       { threshold: 0.1 }
     );
 
-    observer.observe(loadMoreRef.current);
+    observer.observe(currentRef);
 
     return () => {
-      if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [hasMore, filteredTransactions.length]);
@@ -170,7 +178,9 @@ export default function HistoryPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full px-4 py-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-foreground">Transaction History</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              Transaction History
+            </h1>
             <div className="flex gap-2">
               <Button
                 variant="ghost"
@@ -220,25 +230,27 @@ export default function HistoryPage() {
           </div>
 
           <div className="space-y-6">
-            {Object.entries(groupedTransactions).map(([dateGroup, transactions]) => (
-              <div key={dateGroup} className="space-y-4">
-                <h2 className="font-semibold text-foreground">{dateGroup}</h2>
-                <div className="space-y-2">
-                  {transactions.map((transaction) => (
-                    <RecentActivityItem
-                      key={transaction.id}
-                      type={transaction.type}
-                      username={transaction.username}
-                      amount={transaction.amount}
-                      token={transaction.token}
-                      timestamp={transaction.timestamp}
-                      isPrivate={transaction.isPrivate}
-                      onClick={() => handleTransactionClick(transaction)}
-                    />
-                  ))}
+            {Object.entries(groupedTransactions).map(
+              ([dateGroup, transactions]) => (
+                <div key={dateGroup} className="space-y-4">
+                  <h2 className="font-semibold text-foreground">{dateGroup}</h2>
+                  <div className="space-y-2">
+                    {transactions.map((transaction) => (
+                      <RecentActivityItem
+                        key={transaction.id}
+                        type={transaction.type}
+                        username={transaction.username}
+                        amount={transaction.amount}
+                        token={transaction.token}
+                        timestamp={transaction.timestamp}
+                        isPrivate={transaction.isPrivate}
+                        onClick={() => handleTransactionClick(transaction)}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
 
             {filteredTransactions.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -251,7 +263,9 @@ export default function HistoryPage() {
 
             {hasMore && (
               <div ref={loadMoreRef} className="flex justify-center py-4">
-                <div className="text-sm text-muted-foreground">Loading more...</div>
+                <div className="text-sm text-muted-foreground">
+                  Loading more...
+                </div>
               </div>
             )}
           </div>
@@ -266,4 +280,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-

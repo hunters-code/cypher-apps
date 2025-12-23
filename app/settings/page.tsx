@@ -1,20 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import {
-  Item,
-  ItemGroup,
-  ItemMedia,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-  ItemActions,
-  ItemSeparator,
-} from "@/components/ui/item";
+
 import {
   Copy,
   Check,
@@ -27,15 +16,24 @@ import {
   HelpCircle,
   FileText,
   LogOut,
-  Eye,
-  EyeOff,
   ChevronRight,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemSeparator,
+} from "@/components/ui/item";
+import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [showAddress, setShowAddress] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedUsername, setCopiedUsername] = useState(false);
 
@@ -59,9 +57,6 @@ export default function SettingsPage() {
   };
 
   const formatAddress = (address: string): string => {
-    if (showAddress) {
-      return address;
-    }
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 

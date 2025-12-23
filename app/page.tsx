@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { CryptoWallet } from "@/components/icons/crypto-wallet";
 import { useRouter } from "next/navigation";
+
+import { CryptoWallet } from "@/components/icons/crypto-wallet";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const router = useRouter();
@@ -16,8 +17,13 @@ export default function Home() {
       <CryptoWallet width={200} height={200} />
       <div className="flex flex-col items-center gap-12 text-center">
         <h1 className="text-4xl font-bold">Your crypto, truly private</h1>
-        <p className="text-muted-foreground">Enjoy cash-level privacy on the blockchain. Send to usernames without exposing your transaction history or balance.</p>
-        <Button size="lg" className="w-full" onClick={handleGetStarted}>Get Started</Button>
+        <p className="text-muted-foreground">
+          Enjoy cash-level privacy on the blockchain. Send to usernames without
+          exposing your transaction history or balance.
+        </p>
+        <Button size="lg" className="w-full" onClick={handleGetStarted}>
+          Get Started
+        </Button>
       </div>
     </div>
   );

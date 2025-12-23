@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
+
 import { useRouter } from "next/navigation";
+
+import {
+  Bell,
+  CheckCircle2,
+  ArrowRight,
+  X,
+  Receipt,
+  Shield,
+  AlertCircle,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Item,
@@ -12,16 +24,6 @@ import {
   ItemActions,
   ItemSeparator,
 } from "@/components/ui/item";
-import {
-  Bell,
-  CheckCircle2,
-  ArrowRight,
-  X,
-  Send,
-  Receipt,
-  Shield,
-  AlertCircle,
-} from "lucide-react";
 
 interface Notification {
   id: string;
@@ -155,17 +157,14 @@ export default function NotificationsPage() {
     }
   };
 
-  const getNotificationIconComponent = (type: Notification["type"]) => {
-    const Icon = getNotificationIcon(type);
-    return <Icon className="h-4 w-4 text-primary" />;
-  };
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full px-4 py-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              Notifications
+            </h1>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
@@ -183,7 +182,7 @@ export default function NotificationsPage() {
               <Bell className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">No notifications</p>
               <p className="text-sm text-muted-foreground mt-2">
-                You're all caught up!
+                You&apos;re all caught up!
               </p>
             </div>
           ) : (
@@ -208,7 +207,9 @@ export default function NotificationsPage() {
                                   ? "bg-primary/5 border-l-2 border-l-primary"
                                   : ""
                               }`}
-                              onClick={() => handleNotificationClick(notification)}
+                              onClick={() =>
+                                handleNotificationClick(notification)
+                              }
                             >
                               <ItemMedia variant="icon">
                                 <IconComponent className="h-4 w-4 text-primary" />
@@ -248,7 +249,9 @@ export default function NotificationsPage() {
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8"
-                                    onClick={(e) => handleDelete(notification.id, e)}
+                                    onClick={(e) =>
+                                      handleDelete(notification.id, e)
+                                    }
                                   >
                                     <X className="h-4 w-4 text-muted-foreground" />
                                   </Button>
@@ -281,4 +284,3 @@ export default function NotificationsPage() {
     </div>
   );
 }
-

@@ -1,10 +1,11 @@
-import { Coins, Circle, DollarSign } from "lucide-react";
-import { LucideIcon } from "lucide-react";
-import { USDCIcon } from "@/components/icons/USDCIcon";
-import { ETHIcon } from "@/components/icons/ETHIcon";
-import { BTCIcon } from "@/components/icons/BTCIcon";
-import { USDTIcon } from "@/components/icons/USDTIcon";
 import { ComponentType } from "react";
+
+import { Coins, DollarSign, LucideIcon } from "lucide-react";
+
+import { BTCIcon } from "@/components/icons/BTCIcon";
+import { ETHIcon } from "@/components/icons/ETHIcon";
+import { USDCIcon } from "@/components/icons/USDCIcon";
+import { USDTIcon } from "@/components/icons/USDTIcon";
 
 interface AssetIconConfig {
   icon: LucideIcon | ComponentType<{ className?: string }>;
@@ -58,4 +59,3 @@ export function getAssetIcon(symbol: string): AssetIconConfig {
 }
 
 export { assetIconsMap };
-

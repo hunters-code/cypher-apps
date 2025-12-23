@@ -21,7 +21,7 @@ export function formatCurrency(
   return formatter.format(numAmount);
 }
 
-export function formatBalance(amount: number | string, currency: string = "USD"): string {
+export function formatBalance(amount: number | string): string {
   const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
 
   if (isNaN(numAmount)) {
@@ -39,7 +39,10 @@ export function formatBalance(amount: number | string, currency: string = "USD")
   return numAmount.toFixed(2);
 }
 
-export function formatCryptoAmount(amount: number | string, decimals: number = 4): string {
+export function formatCryptoAmount(
+  amount: number | string,
+  decimals: number = 4
+): string {
   const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
 
   if (isNaN(numAmount)) {
@@ -74,4 +77,3 @@ export function formatUSDValue(amount: number | string): string {
     maximumFractionDigits: 2,
   }).format(numAmount);
 }
-

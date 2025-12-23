@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+
 import { CheckCircle2, Lock, ArrowRight } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
 export default function SendSuccessPage() {
@@ -39,7 +42,9 @@ export default function SendSuccessPage() {
         <div className="relative flex items-center justify-center">
           <div
             className={`absolute w-32 h-32 rounded-full bg-primary/20 transition-all duration-700 ${
-              isAnimating ? "scale-0 opacity-0" : "scale-100 opacity-100 animate-pulse"
+              isAnimating
+                ? "scale-0 opacity-0"
+                : "scale-100 opacity-100 animate-pulse"
             }`}
             style={{ animationDelay: "0.1s" }}
           />
@@ -60,7 +65,9 @@ export default function SendSuccessPage() {
                 isAnimating ? "scale-0 rotate-180" : "scale-100 rotate-0"
               }`}
               style={{
-                animation: isAnimating ? "none" : "checkmark 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+                animation: isAnimating
+                  ? "none"
+                  : "checkmark 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
               }}
             />
           </div>
@@ -68,10 +75,14 @@ export default function SendSuccessPage() {
 
         <div
           className={`flex flex-col gap-2 transition-all duration-500 ${
-            isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+            isAnimating
+              ? "opacity-0 translate-y-4"
+              : "opacity-100 translate-y-0"
           }`}
         >
-          <h1 className="text-3xl font-bold text-foreground">Transaction Successful!</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            Transaction Successful!
+          </h1>
           <p className="text-base text-muted-foreground">
             Your crypto has been sent successfully.
           </p>
@@ -79,7 +90,9 @@ export default function SendSuccessPage() {
 
         <div
           className={`w-full space-y-4 transition-all duration-700 delay-300 ${
-            isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+            isAnimating
+              ? "opacity-0 translate-y-4"
+              : "opacity-100 translate-y-0"
           }`}
         >
           <div className="p-4 border rounded-lg space-y-3 bg-card">
@@ -95,19 +108,27 @@ export default function SendSuccessPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">USD Value</span>
-              <span className="text-sm font-medium">{formatUSDValue(usdValue)}</span>
+              <span className="text-sm font-medium">
+                {formatUSDValue(usdValue)}
+              </span>
             </div>
             {isPrivate && (
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Privacy Mode</span>
+                  <span className="text-sm text-muted-foreground">
+                    Privacy Mode
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-primary">Enabled</span>
+                <span className="text-sm font-medium text-primary">
+                  Enabled
+                </span>
               </div>
             )}
             <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-sm text-muted-foreground">Transaction Hash</span>
+              <span className="text-sm text-muted-foreground">
+                Transaction Hash
+              </span>
               <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">
                 {txHash}
               </span>
@@ -125,7 +146,11 @@ export default function SendSuccessPage() {
           View Transaction
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-        <Button variant="secondary" className="w-full" onClick={handleBackToDashboard}>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={handleBackToDashboard}
+        >
           Back to Dashboard
         </Button>
       </div>
@@ -149,4 +174,3 @@ export default function SendSuccessPage() {
     </div>
   );
 }
-

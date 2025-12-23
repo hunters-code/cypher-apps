@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageHeader } from "@/components/layout/page-header";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function AuthPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       router.push("/onboarding");
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -81,7 +82,9 @@ export default function AuthPage() {
               value={emailOrPhone}
               onChange={handleInputChange}
               onBlur={() => validateInput(emailOrPhone)}
-              className={error ? "border-destructive focus-visible:ring-destructive" : ""}
+              className={
+                error ? "border-destructive focus-visible:ring-destructive" : ""
+              }
               aria-invalid={!!error}
               aria-describedby={error ? "email-error" : undefined}
               disabled={isLoading}
@@ -113,10 +116,7 @@ export default function AuthPage() {
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
             By continuing, you agree to our{" "}
-            <Link
-              href="/terms"
-              className="text-primary hover:underline"
-            >
+            <Link href="/terms" className="text-primary hover:underline">
               Terms & Privacy
             </Link>
           </p>
