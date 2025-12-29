@@ -74,6 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
     other: {
+      "base:app_id": "6952106ac63ad876c90817b6",
       "fc:miniapp": JSON.stringify({
         version: "next",
         imageUrl: `${appUrl}/embed-image.png`,
