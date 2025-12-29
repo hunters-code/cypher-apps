@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -9,7 +9,7 @@ import { CheckCircle2, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
-export default function SendSuccessPage() {
+function SendSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isAnimating, setIsAnimating] = useState(true);
@@ -172,5 +172,19 @@ export default function SendSuccessPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function SendSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col justify-center items-center gap-4 h-full w-full py-16 px-8">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      }
+    >
+      <SendSuccessContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -9,7 +9,7 @@ import { Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
-export default function SendConfirmPage() {
+function SendConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -130,5 +130,19 @@ export default function SendConfirmPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function SendConfirmPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col justify-center items-center gap-4 h-full w-full py-16 px-8">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      }
+    >
+      <SendConfirmContent />
+    </Suspense>
   );
 }
