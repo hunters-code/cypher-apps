@@ -1,5 +1,6 @@
 export async function GET() {
-  const appUrl = process.env.NEXT_PUBLIC_URL || "https://your-app.com";
+  const appUrl =
+    process.env.NEXT_PUBLIC_URL || "https://cypher-apps.vercel.app";
 
   const manifest = {
     accountAssociation: {

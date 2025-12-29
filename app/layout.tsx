@@ -65,7 +65,8 @@ const satoshi = localFont({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const appUrl = process.env.NEXT_PUBLIC_URL || "https://your-app.com";
+  const appUrl =
+    process.env.NEXT_PUBLIC_URL || "https://cypher-apps.vercel.app";
   const appName = "Cypher Wallet";
 
   return {
