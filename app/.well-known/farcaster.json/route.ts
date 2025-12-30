@@ -4,37 +4,43 @@ export async function GET() {
 
   const manifest = {
     accountAssociation: {
-      header: "",
-      payload: "",
-      signature: "",
+      header:
+        "eyJmaWQiOi0xLCJ0eXBlIjoiYXV0aCIsImtleSI6IjB4MjI0MTYyNTM0NjEwNjI2ZEFjYTg0YWQyNjBBMzMxNDg1MTY4QzM2QSJ9",
+      payload: "eyJkb21haW4iOiJjeXBoZXItYXBwcy52ZXJjZWwuYXBwIn0",
+      signature:
+        "AAAAAAAAAAAAAAAAyhG94Fl3s2MRZwKIYr4qFzl2yhEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiSCrVbLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAul7REO_bo9AFv8iC11NYrLu4WEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASQ_-6NvAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAi6b4Q-1CJyfp7uFksI9trTmaWB4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAPhSELIcxQMC9He6VmhtIBncm2etAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBguudMuesCuIjNSEihiD3MgCZulWTp_BWoXpWzWQhNQRJ1PRAAOtInem7VjpdM1aNJYhcc0xV6J9snVPSdqUFXRwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZJJkkmSSZJJkkmSSZJJkkmSSZJJkkmSSZJJkkmSSZJI",
     },
     miniapp: {
       version: "1",
       name: "Cypher Wallet",
       homeUrl: appUrl,
-      iconUrl: `${appUrl}/icon.png`,
+      iconUrl: `${appUrl}/embed-image.png`,
       splashImageUrl: `${appUrl}/splash-image.png`,
       splashBackgroundColor: "#000000",
       webhookUrl: `${appUrl}/api/webhook`,
-      subtitle: "Fast, fun, social",
+      subtitle: "Private crypto wallet",
       description:
         "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
       screenshotUrls: [
-        `${appUrl}/screenshot1.png`,
-        `${appUrl}/screenshot2.png`,
-        `${appUrl}/screenshot3.png`,
+        `${appUrl}/s1.png`,
+        `${appUrl}/s2.png`,
+        `${appUrl}/s3.png`,
       ],
       primaryCategory: "finance",
-      tags: ["wallet", "privacy", "crypto", "base"],
-      heroImageUrl: `${appUrl}/og-image.png`,
-      tagline: "Send to usernames without exposing your transaction history",
+      tags: ["crypto", "wallet", "privacy", "baseapp"],
+      heroImageUrl: `${appUrl}/embed-image.png`,
+      tagline: "Your crypto, truly private",
       ogTitle: "Cypher Wallet",
       ogDescription:
         "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
-      ogImageUrl: `${appUrl}/og-image.png`,
+      ogImageUrl: `${appUrl}/embed-image.png`,
       noindex: true,
     },
   };
 
-  return Response.json(manifest);
+  return Response.json(manifest, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
