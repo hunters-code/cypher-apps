@@ -4,15 +4,25 @@ import { Suspense, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Lock, ArrowRight } from "lucide-react";
+import { ethers } from "ethers";
+import { Lock, ArrowRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useBaseProvider, getSigner } from "@/hooks/useBlockchain";
+import {
+  getViewingKey,
+  getAddress,
+  generateStealthAddress,
+  announceStealthTransaction,
+} from "@/lib/blockchain";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
 function SendConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const provider = useBaseProvider();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const recipient = searchParams.get("recipient") || "@username";
   const amount = searchParams.get("amount") || "0";
@@ -24,8 +34,81 @@ function SendConfirmContent() {
 
   const handleConfirm = async () => {
     setIsLoading(true);
+    setError("");
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (!provider) {
+        throw new Error("Provider not available");
+      }
+
+      const signer = await getSigner();
+      if (!signer) {
+        throw new Error("Please connect your wallet");
+      }
+
+      let stealthAddress: string | null = null;
+      let ephemeralPublicKey: string | null = null;
+      let txHash: string;
+
+      // If private mode, generate stealth address
+      if (isPrivate && recipient.startsWith("@")) {
+        const cleanRecipient = recipient.replace(/^@+/, "");
+
+        // Get recipient's viewing key
+        const viewingKey = await getViewingKey(provider, cleanRecipient);
+
+        // Generate stealth address
+        const stealthResult = generateStealthAddress(viewingKey);
+        stealthAddress = stealthResult.stealthAddress;
+        ephemeralPublicKey = stealthResult.ephemeralPublicKey;
+
+        // Send ETH to stealth address
+        const tx = await signer.sendTransaction({
+          to: stealthAddress,
+          value: ethers.parseEther(amount),
+        });
+
+        const receipt = await tx.wait();
+        if (!receipt) {
+          throw new Error("Transaction failed");
+        }
+
+        txHash = receipt.hash;
+
+        // Announce the stealth transaction
+        await announceStealthTransaction(
+          signer,
+          stealthAddress,
+          ephemeralPublicKey,
+          {
+            amount,
+            tokenSymbol: token,
+            message: `Private transfer to ${recipient}`,
+          }
+        );
+      } else {
+        // Regular transfer (public)
+        let toAddress: string;
+
+        if (recipient.startsWith("0x")) {
+          toAddress = recipient;
+        } else {
+          const cleanRecipient = recipient.replace(/^@+/, "");
+          toAddress = await getAddress(provider, cleanRecipient);
+        }
+
+        const tx = await signer.sendTransaction({
+          to: toAddress,
+          value: ethers.parseEther(amount),
+        });
+
+        const receipt = await tx.wait();
+        if (!receipt) {
+          throw new Error("Transaction failed");
+        }
+
+        txHash = receipt.hash;
+      }
 
       const params = new URLSearchParams({
         recipient,
@@ -33,12 +116,24 @@ function SendConfirmContent() {
         token,
         private: isPrivate.toString(),
         usdValue,
-        txHash: `0x${Math.random().toString(16).substring(2, 10)}...${Math.random().toString(16).substring(2, 10)}`,
+        txHash,
+        ...(stealthAddress && { stealthAddress }),
       });
 
       router.push(`/send/success?${params.toString()}`);
     } catch (err) {
       console.error("Transaction failed:", err);
+      if (err instanceof Error) {
+        if (err.message.includes("user rejected")) {
+          setError("Transaction cancelled");
+        } else if (err.message.includes("insufficient funds")) {
+          setError("Insufficient balance for transaction");
+        } else {
+          setError(err.message || "Transaction failed. Please try again.");
+        }
+      } else {
+        setError("Transaction failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -106,13 +201,22 @@ function SendConfirmContent() {
               </span>
             </div>
           </div>
+
+          {error && (
+            <div className="p-4 border border-destructive rounded-lg bg-destructive/10">
+              <p className="text-sm text-destructive text-center">{error}</p>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex flex-col gap-4 w-full">
         <Button className="w-full" onClick={handleConfirm} disabled={isLoading}>
           {isLoading ? (
-            "Processing..."
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
           ) : (
             <>
               Confirm Send

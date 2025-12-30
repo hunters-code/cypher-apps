@@ -1,30 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { QrCode, Lock } from "lucide-react";
+import { QrCode, Lock, Loader2, Check, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useBaseProvider } from "@/hooks/useBlockchain";
+import { getAddress } from "@/lib/blockchain";
 
 export default function SendPage() {
   const router = useRouter();
+  const provider = useBaseProvider();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [isPrivate, setIsPrivate] = useState(true);
   const [token] = useState("ETH");
+  const [isValidatingRecipient, setIsValidatingRecipient] = useState(false);
+  const [recipientValid, setRecipientValid] = useState<boolean | null>(null);
+  const [recipientError, setRecipientError] = useState("");
+
+  // Validate recipient (username or address)
+  useEffect(() => {
+    if (!recipient.trim() || !provider) {
+      setRecipientValid(null);
+      setRecipientError("");
+      return;
+    }
+
+    const validateRecipient = async () => {
+      setIsValidatingRecipient(true);
+      setRecipientError("");
+
+      try {
+        const cleanRecipient = recipient.replace(/^@+/, "");
+
+        // Check if it's a valid Ethereum address
+        if (recipient.startsWith("0x") && recipient.length === 42) {
+          setRecipientValid(true);
+          setIsValidatingRecipient(false);
+          return;
+        }
+
+        // Check if username exists
+        try {
+          const address = await getAddress(provider, cleanRecipient);
+          if (
+            address &&
+            address !== "0x0000000000000000000000000000000000000000"
+          ) {
+            setRecipientValid(true);
+          } else {
+            setRecipientValid(false);
+            setRecipientError("Username not found");
+          }
+        } catch {
+          setRecipientValid(false);
+          setRecipientError("Username not found");
+        }
+      } catch {
+        setRecipientValid(false);
+        setRecipientError("Invalid recipient");
+      } finally {
+        setIsValidatingRecipient(false);
+      }
+    };
+
+    const timeoutId = setTimeout(validateRecipient, 500);
+    return () => clearTimeout(timeoutId);
+  }, [recipient, provider]);
 
   const handleContinue = () => {
     if (!recipient.trim() || !amount.trim()) {
       return;
     }
 
+    if (recipientValid === false || isValidatingRecipient) {
+      return;
+    }
+
     const usdValue = (parseFloat(amount) * 1790).toFixed(2);
     const params = new URLSearchParams({
-      recipient: recipient.startsWith("@") ? recipient : `@${recipient}`,
+      recipient: recipient.startsWith("@")
+        ? recipient
+        : recipient.startsWith("0x")
+          ? recipient
+          : `@${recipient}`,
       amount,
       token,
       private: isPrivate.toString(),
@@ -74,9 +138,33 @@ export default function SendPage() {
                 <QrCode className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground text-left">
-              Send to username or paste address
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground text-left">
+                Send to username or paste address
+              </p>
+              {recipient.trim() && (
+                <div className="flex items-center gap-2 text-xs">
+                  {isValidatingRecipient ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                      <span className="text-muted-foreground">Checking...</span>
+                    </>
+                  ) : recipientValid === true ? (
+                    <>
+                      <Check className="h-3 w-3 text-green-600" />
+                      <span className="text-green-600">Valid</span>
+                    </>
+                  ) : recipientValid === false ? (
+                    <>
+                      <X className="h-3 w-3 text-destructive" />
+                      <span className="text-destructive">
+                        {recipientError || "Invalid"}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -149,7 +237,12 @@ export default function SendPage() {
       <div className="flex flex-col gap-4 w-full">
         <Button
           className="w-full"
-          disabled={!recipient.trim() || !amount.trim()}
+          disabled={
+            !recipient.trim() ||
+            !amount.trim() ||
+            recipientValid === false ||
+            isValidatingRecipient
+          }
           onClick={handleContinue}
         >
           Continue

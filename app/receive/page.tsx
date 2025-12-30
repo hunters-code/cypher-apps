@@ -14,8 +14,13 @@ export default function ReceivePage() {
   const router = useRouter();
   const [copiedId, setCopiedId] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
-  const username = "@nashirjamali";
-  const walletAddress = "0x9a3d6c5f8e2b1a7c4d9e8f3b2a1c6d5e4f3a2b1c";
+  const [username] = useState(() => {
+    if (typeof window === "undefined") return "@username";
+    return localStorage.getItem("cypher_username") || "@username";
+  });
+  const [walletAddress] = useState(
+    "0x0000000000000000000000000000000000000000"
+  );
 
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(username);
