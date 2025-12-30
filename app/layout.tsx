@@ -1,6 +1,7 @@
 import localFont from "next/font/local";
 
 import { MobileContainer } from "@/components/layout/mobile-container";
+import { MetaTags } from "@/components/meta-tags";
 import { MiniAppProvider } from "@/components/miniapp-provider";
 
 import type { Metadata } from "next";
@@ -100,10 +101,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="base:app_id" content="6952106ac63ad876c90817b6" />
+      </head>
       <body
         className={`${satoshi.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
+        <MetaTags />
         <MiniAppProvider>
           <MobileContainer>{children}</MobileContainer>
         </MiniAppProvider>
