@@ -1,3 +1,7 @@
+"use client";
+
+import { usePrivy } from "@privy-io/react-auth";
+
 import { Header } from "@/components/layout/Header";
 import { RecentActivityList } from "@/components/transaction/RecentActivityList";
 import { ActionsButton } from "@/components/wallet/ActionsButton";
@@ -5,6 +9,11 @@ import { AssetList } from "@/components/wallet/AssetList";
 import { BalanceDisplay } from "@/components/wallet/BalanceDisplay";
 
 export default function DashboardPage() {
+  const { authenticated, user } = usePrivy();
+
+  console.log("User authenticated:", authenticated);
+  console.log("User info:", user);
+
   return (
     <div className="flex flex-col gap-4 h-full w-full py-16 px-8">
       <Header username="@nashirjamali" />

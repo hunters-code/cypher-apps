@@ -5,15 +5,22 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useLoginWithEmail, useLoginWithSms } from "@privy-io/react-auth";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AuthPage() {
   const router = useRouter();
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { setContactValue, setLoginMethod } = useAuth();
+  const { sendCode: sendEmailCode } = useLoginWithEmail();
+  const { sendCode: sendSmsCode } = useLoginWithSms();
 
   const validateInput = (value: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,10 +60,26 @@ export default function AuthPage() {
     setIsLoading(true);
     setError("");
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[\d\s-()]+$/;
+
+    setContactValue(emailOrPhone);
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      router.push("/onboarding");
-    } catch {
+      // await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (emailRegex.test(emailOrPhone)) {
+        setLoginMethod("email");
+        await sendEmailCode({ email: emailOrPhone });
+      } else if (phoneRegex.test(emailOrPhone)) {
+        setLoginMethod("sms");
+        await sendSmsCode({ phoneNumber: emailOrPhone });
+      }
+
+      // router.push("/onboarding");
+      router.push("/otp");
+    } catch (error) {
+      console.log(error);
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);

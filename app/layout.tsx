@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import { MobileContainer } from "@/components/layout/mobile-container";
 import { MetaTags } from "@/components/meta-tags";
 import { MiniAppProvider } from "@/components/miniapp-provider";
+import { AuthProvider } from "@/providers/AuthProvider";
+import PrivyProvider from "@/providers/PrivyProvider";
 
 import type { Metadata } from "next";
 
@@ -109,9 +111,13 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <MetaTags />
-        <MiniAppProvider>
-          <MobileContainer>{children}</MobileContainer>
-        </MiniAppProvider>
+        <PrivyProvider>
+          <AuthProvider>
+            <MiniAppProvider>
+              <MobileContainer>{children}</MobileContainer>
+            </MiniAppProvider>
+          </AuthProvider>
+        </PrivyProvider>
       </body>
     </html>
   );

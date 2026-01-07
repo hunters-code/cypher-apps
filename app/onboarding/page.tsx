@@ -99,6 +99,8 @@ export default function OnboardingPage() {
     setError("");
 
     try {
+      // Should we send OTP to email from from here instead?
+
       // Step 1: Generate stealth keys
       const keys = await generateStealthKeys();
 

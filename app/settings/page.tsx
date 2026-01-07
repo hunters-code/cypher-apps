@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { usePrivy } from "@privy-io/react-auth";
 import {
   Copy,
   Check,
@@ -37,6 +38,8 @@ export default function SettingsPage() {
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedUsername, setCopiedUsername] = useState(false);
 
+  const { logout } = usePrivy();
+
   const username = "@nashirjamali";
   const walletAddress = "0x9a3d6c5f8e2b1a7c4d9e8f3b2a1c6d5e4f3a2b1c";
 
@@ -60,7 +63,8 @@ export default function SettingsPage() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 
