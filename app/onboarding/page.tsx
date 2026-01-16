@@ -220,11 +220,6 @@ export default function OnboardingPage() {
       </div>
 
       <div className="flex flex-col gap-4 w-full">
-        {!isConnected && (
-          <p className="text-sm text-muted-foreground text-center">
-            Connecting your wallet...
-          </p>
-        )}
         <Button
           type="button"
           onClick={handleSubmit}
