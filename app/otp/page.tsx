@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useLoginWithEmail } from "@privy-io/react-auth";
+import { usePrivy, useLoginWithEmail } from "@privy-io/react-auth";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useAuth } from "@/hooks/useAuth";
+import { useBaseProvider } from "@/hooks/useBlockchain";
+import { getUsername } from "@/lib/blockchain";
 
 export default function OTPPage() {
   const router = useRouter();
@@ -22,21 +24,29 @@ export default function OTPPage() {
   const [error, setError] = useState("");
 
   const { loginMethod, contactValue } = useAuth();
+  const { user } = usePrivy();
+  const provider = useBaseProvider();
+
   const {
     loginWithCode,
     sendCode: sendEmailCode,
     state,
   } = useLoginWithEmail({
-    onComplete: (params) => {
-      console.log("params", params);
+    onComplete: async (params) => {
+      // Check if user has a registered username on the blockchain
+      let hasUsername = false;
 
-      /**
-       * TODO: check if user already has a username as well
-       * if yes, redirect to dashboard
-       * if no, redirect to onboarding
-       */
-      const hasUsername = true;
+      if (provider && user?.wallet?.address) {
+        try {
+          const username = await getUsername(provider, user.wallet.address);
+          hasUsername = !!username && username.length > 0;
+        } catch {
+          // User not registered yet
+          hasUsername = false;
+        }
+      }
 
+      // Redirect based on registration status
       if (params.isNewUser || !hasUsername) {
         router.push("/onboarding");
       } else {

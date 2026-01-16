@@ -12,8 +12,8 @@ export const ANNOUNCEMENT_ADDRESS =
   process.env.NEXT_PUBLIC_ANNOUNCEMENT_ADDRESS ||
   "0x0000000000000000000000000000000000000000";
 
-// Base L2 Chain ID
-export const BASE_CHAIN_ID = 8453;
+// Base L2 Chain ID (8453 for mainnet, 84532 for sepolia testnet)
+export const BASE_CHAIN_ID = 84532; // Default to Sepolia testnet
 
 // Registry Contract ABI
 export const REGISTRY_ABI = [
@@ -63,9 +63,8 @@ export const REGISTRY_ABI = [
     type: "event",
     inputs: [
       { name: "user", type: "address", indexed: true },
-      { name: "username", type: "string", indexed: true },
+      { name: "username", type: "string", indexed: false },
       { name: "viewingKeyPublic", type: "bytes", indexed: false },
-      { name: "timestamp", type: "uint256", indexed: false },
     ],
   },
 ] as const;

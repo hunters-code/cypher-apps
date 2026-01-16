@@ -9,8 +9,8 @@ import { Check, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getSigner } from "@/hooks/useBlockchain";
 import { useUsername } from "@/hooks/useUsername";
+import { useWallet } from "@/hooks/useWallet";
 import { generateStealthKeys, registerUsername } from "@/lib/blockchain";
 
 export default function OnboardingPage() {
@@ -20,6 +20,7 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
   const { checkAvailability, isChecking, availability } = useUsername();
+  const { signer, isConnected } = useWallet();
 
   // Debounced username availability check
   useEffect(() => {
@@ -99,23 +100,20 @@ export default function OnboardingPage() {
     setError("");
 
     try {
-      // Should we send OTP to email from from here instead?
+      // Check if wallet is connected
+      if (!signer) {
+        throw new Error("Please connect your wallet first");
+      }
 
       // Step 1: Generate stealth keys
       const keys = await generateStealthKeys();
 
-      // Step 2: Get signer
-      const signer = await getSigner();
-      if (!signer) {
-        throw new Error("Please connect your wallet");
-      }
-
       setIsGeneratingKeys(false);
 
-      // Step 3: Register username on blockchain
+      // Step 2: Register username on blockchain
       await registerUsername(signer, cleanUsername, keys.viewingKey);
 
-      // Step 4: Store keys securely (in production, encrypt these)
+      // Step 3: Store keys securely (in production, encrypt these)
       localStorage.setItem(
         "cypher_keys",
         JSON.stringify({
@@ -126,10 +124,10 @@ export default function OnboardingPage() {
         })
       );
 
-      // Step 5: Store username
+      // Step 4: Store username
       localStorage.setItem("cypher_username", `@${cleanUsername}`);
 
-      // Navigate to dashboard
+      // Step 5: Navigate to dashboard
       router.push("/dashboard");
     } catch (err) {
       console.error("Registration error:", err);
@@ -139,7 +137,7 @@ export default function OnboardingPage() {
         } else if (err.message.includes("insufficient funds")) {
           setError("Insufficient balance for gas fees");
         } else if (err.message.includes("connect your wallet")) {
-          setError("Please connect your wallet");
+          setError("Wallet not connected. Please try logging in again.");
         } else {
           setError(err.message || "Something went wrong. Please try again.");
         }
@@ -222,6 +220,11 @@ export default function OnboardingPage() {
       </div>
 
       <div className="flex flex-col gap-4 w-full">
+        {!isConnected && (
+          <p className="text-sm text-muted-foreground text-center">
+            Connecting your wallet...
+          </p>
+        )}
         <Button
           type="button"
           onClick={handleSubmit}
@@ -230,7 +233,8 @@ export default function OnboardingPage() {
             isLoading ||
             !username.trim() ||
             availability === false ||
-            isChecking
+            isChecking ||
+            !isConnected
           }
         >
           {isGeneratingKeys

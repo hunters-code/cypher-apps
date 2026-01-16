@@ -56,16 +56,44 @@ export function useBrowserProvider(): ethers.BrowserProvider | null {
 }
 
 /**
- * Get a signer from browser provider
+ * Get a signer from Privy embedded wallet
+ * To use this function, import it in a component that has access to Privy hooks
  */
 export async function getSigner(): Promise<ethers.JsonRpcSigner | null> {
-  if (typeof window === "undefined" || !window.ethereum) return null;
+  if (typeof window === "undefined") return null;
 
+  // First try window.ethereum (for Privy embedded wallets)
+  if (window.ethereum) {
+    try {
+      const provider = new ethers.BrowserProvider(
+        window.ethereum,
+        BASE_CHAIN_ID
+      );
+      const signer = await provider.getSigner();
+      return signer;
+    } catch (error) {
+      console.error("Error getting signer from window.ethereum:", error);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get a signer from a Privy wallet provider
+ * Use this when you have access to Privy's wallet provider
+ */
+export async function getSignerFromProvider(
+  provider: ethers.Provider
+): Promise<ethers.Signer | null> {
   try {
-    const provider = new ethers.BrowserProvider(window.ethereum, BASE_CHAIN_ID);
-    const signer = await provider.getSigner();
-    return signer;
-  } catch {
+    if (provider instanceof ethers.BrowserProvider) {
+      return await provider.getSigner();
+    }
+    // If it's a JsonRpcProvider, we can't get a signer directly
+    return null;
+  } catch (error) {
+    console.error("Error getting signer from provider:", error);
     return null;
   }
 }
