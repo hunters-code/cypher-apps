@@ -5,6 +5,7 @@
 import { useState, useCallback } from "react";
 
 import { checkUsernameAvailability } from "@/lib/blockchain";
+import { checkUsernamePending } from "@/lib/supabase/pending-registration";
 
 import { useBaseProvider } from "./useBlockchain";
 
@@ -15,15 +16,26 @@ export function useUsername() {
 
   const checkAvailability = useCallback(
     async (username: string) => {
-      if (!provider || !username.trim()) {
+      if (!username.trim()) {
         setAvailability(null);
         return null;
       }
 
       setIsChecking(true);
       try {
-        // Remove @ prefix if present
         const cleanUsername = username.replace(/^@+/, "");
+
+        const isPending = await checkUsernamePending(cleanUsername);
+        if (isPending) {
+          setAvailability(false);
+          return false;
+        }
+
+        if (!provider) {
+          setAvailability(null);
+          return null;
+        }
+
         const isAvailable = await checkUsernameAvailability(
           provider,
           cleanUsername

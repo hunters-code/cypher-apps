@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useUsername } from "@/hooks/useUsername";
 import { useWallet } from "@/hooks/useWallet";
 import { generateStealthKeys, registerUsername } from "@/lib/blockchain";
+import { createPendingRegistration } from "@/lib/supabase/pending-registration";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
   const { checkAvailability, isChecking, availability } = useUsername();
-  const { signer, isConnected } = useWallet();
+  const { signer, isConnected, address } = useWallet();
 
   // Debounced username availability check
   useEffect(() => {
@@ -110,32 +111,51 @@ export default function OnboardingPage() {
 
       setIsGeneratingKeys(false);
 
-      // Step 2: Register username on blockchain
-      await registerUsername(signer, cleanUsername, keys.viewingKey);
+      if (!address) {
+        throw new Error("Wallet address not found");
+      }
 
-      // Step 3: Store keys securely (in production, encrypt these)
-      localStorage.setItem(
-        "cypher_keys",
-        JSON.stringify({
-          viewingKey: keys.viewingKey,
-          viewingKeyPrivate: keys.viewingKeyPrivate,
-          spendingKey: keys.spendingKey,
-          spendingKeyPrivate: keys.spendingKeyPrivate,
-        })
-      );
+      try {
+        await registerUsername(signer, cleanUsername, keys.viewingKey);
 
-      // Step 4: Store username
-      localStorage.setItem("cypher_username", `@${cleanUsername}`);
+        localStorage.setItem(
+          "cypher_keys",
+          JSON.stringify({
+            viewingKey: keys.viewingKey,
+            viewingKeyPrivate: keys.viewingKeyPrivate,
+            spendingKey: keys.spendingKey,
+            spendingKeyPrivate: keys.spendingKeyPrivate,
+          })
+        );
 
-      // Step 5: Navigate to dashboard
-      router.push("/dashboard");
+        localStorage.setItem("cypher_username", `@${cleanUsername}`);
+
+        router.push("/dashboard");
+      } catch (blockchainError) {
+        if (
+          blockchainError instanceof Error &&
+          (blockchainError.message.includes("insufficient funds") ||
+            blockchainError.message.includes("insufficient balance"))
+        ) {
+          await createPendingRegistration({
+            username: cleanUsername,
+            walletAddress: address,
+            viewingKey: keys.viewingKey,
+            viewingKeyPrivate: keys.viewingKeyPrivate,
+            spendingKey: keys.spendingKey,
+            spendingKeyPrivate: keys.spendingKeyPrivate,
+          });
+
+          router.push(`/onboarding/complete?username=${cleanUsername}`);
+        } else {
+          throw blockchainError;
+        }
+      }
     } catch (err) {
       console.error("Registration error:", err);
       if (err instanceof Error) {
         if (err.message.includes("user rejected")) {
           setError("Transaction cancelled");
-        } else if (err.message.includes("insufficient funds")) {
-          setError("Insufficient balance for gas fees");
         } else if (err.message.includes("connect your wallet")) {
           setError("Wallet not connected. Please try logging in again.");
         } else {
