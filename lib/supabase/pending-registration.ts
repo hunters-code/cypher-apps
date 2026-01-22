@@ -3,7 +3,7 @@ import type {
   PendingRegistration,
 } from "@/types/pending-registration";
 
-import { supabase } from "./client";
+import { createClient } from "./client";
 
 const EXPIRY_DAYS = 30;
 
@@ -13,6 +13,7 @@ export async function createPendingRegistration(
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + EXPIRY_DAYS);
 
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("pending_registrations")
     .insert({
@@ -39,6 +40,7 @@ export async function createPendingRegistration(
 export async function getPendingRegistrationByUsername(
   username: string
 ): Promise<PendingRegistration | null> {
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("pending_registrations")
     .select("*")
@@ -60,6 +62,7 @@ export async function getPendingRegistrationByUsername(
 export async function getPendingRegistrationByWallet(
   walletAddress: string
 ): Promise<PendingRegistration | null> {
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("pending_registrations")
     .select("*")
@@ -81,6 +84,7 @@ export async function getPendingRegistrationByWallet(
 export async function markPendingRegistrationAsCompleted(
   username: string
 ): Promise<void> {
+  const supabase = createClient();
   const { error } = await supabase
     .from("pending_registrations")
     .update({ completed: true })
