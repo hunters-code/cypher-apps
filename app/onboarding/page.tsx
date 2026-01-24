@@ -116,7 +116,8 @@ export default function OnboardingPage() {
       }
 
       try {
-        await registerUsername(signer, cleanUsername, keys.viewingKey);
+        // TODO: SKip this process
+        // await registerUsername(signer, cleanUsername, keys.viewingKey);
 
         localStorage.setItem(
           "cypher_keys",
@@ -130,13 +131,16 @@ export default function OnboardingPage() {
 
         localStorage.setItem("cypher_username", `@${cleanUsername}`);
 
-        router.push("/dashboard");
+        throw new Error('simulate error process');
+
+        // router.push(`/onboarding/complete?username=${cleanUsername}`);
+        // router.push("/dashboard");
       } catch (blockchainError) {
         if (
-          blockchainError instanceof Error &&
-          (blockchainError.message.includes("insufficient funds") ||
-            blockchainError.message.includes("insufficient balance"))
-        ) {
+          blockchainError instanceof Error)
+          // (blockchainError.message.includes("insufficient funds") ||
+          //   blockchainError.message.includes("insufficient balance"))
+         {
           await createPendingRegistration({
             username: cleanUsername,
             walletAddress: address,
