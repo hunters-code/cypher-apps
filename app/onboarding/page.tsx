@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUsername } from "@/hooks/useUsername";
 import { useWallet } from "@/hooks/useWallet";
-import { generateStealthKeys, registerUsername } from "@/lib/blockchain";
+import { generateStealthKeys } from "@/lib/blockchain";
 import { createPendingRegistration } from "@/lib/supabase/pending-registration";
 
 export default function OnboardingPage() {
@@ -21,7 +21,13 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
   const { checkAvailability, isChecking, availability } = useUsername();
-  const { signer, isConnected, address } = useWallet();
+  const {
+    signer,
+    isConnected,
+    address,
+    walletAddress,
+    isLoading: isWalletLoading,
+  } = useWallet();
 
   // Debounced username availability check
   useEffect(() => {
@@ -111,50 +117,23 @@ export default function OnboardingPage() {
 
       setIsGeneratingKeys(false);
 
-      if (!address) {
-        throw new Error("Wallet address not found");
-      }
-
-      try {
-        // TODO: SKip this process
-        // await registerUsername(signer, cleanUsername, keys.viewingKey);
-
-        localStorage.setItem(
-          "cypher_keys",
-          JSON.stringify({
-            viewingKey: keys.viewingKey,
-            viewingKeyPrivate: keys.viewingKeyPrivate,
-            spendingKey: keys.spendingKey,
-            spendingKeyPrivate: keys.spendingKeyPrivate,
-          })
+      const walletAddr = address || walletAddress;
+      if (!walletAddr) {
+        throw new Error(
+          "Wallet address not found. Please ensure you are logged in."
         );
-
-        localStorage.setItem("cypher_username", `@${cleanUsername}`);
-
-        throw new Error('simulate error process');
-
-        // router.push(`/onboarding/complete?username=${cleanUsername}`);
-        // router.push("/dashboard");
-      } catch (blockchainError) {
-        if (
-          blockchainError instanceof Error)
-          // (blockchainError.message.includes("insufficient funds") ||
-          //   blockchainError.message.includes("insufficient balance"))
-         {
-          await createPendingRegistration({
-            username: cleanUsername,
-            walletAddress: address,
-            viewingKey: keys.viewingKey,
-            viewingKeyPrivate: keys.viewingKeyPrivate,
-            spendingKey: keys.spendingKey,
-            spendingKeyPrivate: keys.spendingKeyPrivate,
-          });
-
-          router.push(`/onboarding/complete?username=${cleanUsername}`);
-        } else {
-          throw blockchainError;
-        }
       }
+
+      await createPendingRegistration({
+        username: cleanUsername,
+        walletAddress: walletAddr,
+        viewingKey: keys.viewingKey,
+        viewingKeyPrivate: keys.viewingKeyPrivate,
+        spendingKey: keys.spendingKey,
+        spendingKeyPrivate: keys.spendingKeyPrivate,
+      });
+
+      router.push(`/onboarding/complete?username=${cleanUsername}`);
     } catch (err) {
       console.error("Registration error:", err);
       if (err instanceof Error) {
@@ -250,10 +229,12 @@ export default function OnboardingPage() {
           className="w-full"
           disabled={
             isLoading ||
+            isWalletLoading ||
             !username.trim() ||
             availability === false ||
             isChecking ||
-            !isConnected
+            !isConnected ||
+            (!address && !walletAddress)
           }
         >
           {isGeneratingKeys

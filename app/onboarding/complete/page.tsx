@@ -4,23 +4,41 @@ import { useState, useEffect } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
+import { ethers } from "ethers";
+import {
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+  Copy,
+  Check,
+  Wallet,
+} from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { useWallet } from "@/hooks/useWallet";
 import { registerUsername } from "@/lib/blockchain";
+import { BASE_CHAIN_ID } from "@/lib/constants";
 import {
   getPendingRegistrationByUsername,
   markPendingRegistrationAsCompleted,
 } from "@/lib/supabase/pending-registration";
+import { formatCryptoAmount } from "@/lib/utils/format";
 import type { PendingRegistration } from "@/types/pending-registration";
 
 export default function CompleteRegistrationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const username = searchParams.get("username");
-  const { signer, address, isConnected } = useWallet();
+  const { signer } = useWallet();
 
   const [pendingRegistration, setPendingRegistration] =
     useState<PendingRegistration | null>(null);
@@ -28,6 +46,9 @@ export default function CompleteRegistrationPage() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [balance, setBalance] = useState<string>("0");
+  const [isCheckingBalance, setIsCheckingBalance] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
 
   useEffect(() => {
     async function loadPendingRegistration() {
@@ -41,12 +62,6 @@ export default function CompleteRegistrationPage() {
         const pending = await getPendingRegistrationByUsername(username);
         if (!pending) {
           setError("Pending registration not found or has expired");
-          setIsLoading(false);
-          return;
-        }
-
-        if (pending.wallet_address.toLowerCase() !== address?.toLowerCase()) {
-          setError("This registration belongs to a different wallet");
           setIsLoading(false);
           return;
         }
@@ -67,14 +82,57 @@ export default function CompleteRegistrationPage() {
       }
     }
 
-    if (username && address) {
+    if (username) {
       loadPendingRegistration();
     }
-  }, [username, address]);
+  }, [username]);
+
+  useEffect(() => {
+    async function checkBalance() {
+      if (!pendingRegistration) return;
+
+      setIsCheckingBalance(true);
+      try {
+        const rpcUrl =
+          process.env.NEXT_PUBLIC_BASE_RPC_URL || "https://mainnet.base.org";
+        const rpcProvider = new ethers.JsonRpcProvider(rpcUrl, BASE_CHAIN_ID);
+        const balance = await rpcProvider.getBalance(
+          pendingRegistration.wallet_address
+        );
+        const balanceInEth = ethers.formatEther(balance);
+        setBalance(balanceInEth);
+      } catch (err) {
+        console.error("Error checking balance:", err);
+      } finally {
+        setIsCheckingBalance(false);
+      }
+    }
+
+    if (pendingRegistration) {
+      checkBalance();
+      const interval = setInterval(checkBalance, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [pendingRegistration]);
+
+  const handleCopyAddress = async () => {
+    if (!pendingRegistration) return;
+    await navigator.clipboard.writeText(pendingRegistration.wallet_address);
+    setCopiedAddress(true);
+    setTimeout(() => setCopiedAddress(false), 2000);
+  };
 
   const handleCompleteRegistration = async () => {
     if (!pendingRegistration || !signer) {
       setError("Missing required information");
+      return;
+    }
+
+    const balanceNum = parseFloat(balance);
+    if (balanceNum < 0.001) {
+      setError(
+        "Insufficient balance. You need at least 0.001 ETH for gas fees."
+      );
       return;
     }
 
@@ -120,7 +178,7 @@ export default function CompleteRegistrationPage() {
           err.message.includes("insufficient balance")
         ) {
           setError(
-            "Insufficient balance for gas fees. Please add ETH to your wallet."
+            "Insufficient balance for gas fees. Please add more ETH to your wallet."
           );
         } else {
           setError(err.message || "Failed to complete registration");
@@ -193,6 +251,8 @@ export default function CompleteRegistrationPage() {
     );
   }
 
+  const hasEnoughBalance = parseFloat(balance) >= 0.001;
+
   return (
     <div className="flex flex-col justify-between items-center gap-6 h-full w-full py-32 px-8">
       <div className="flex flex-col items-center gap-6 text-center w-full">
@@ -207,6 +267,72 @@ export default function CompleteRegistrationPage() {
         </p>
 
         <div className="w-full max-w-md space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Receive ETH to Your Wallet
+              </CardTitle>
+              <CardDescription>
+                Send ETH to this address to pay for gas fees
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm text-muted-foreground">
+                  Wallet Address
+                </Label>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <code className="flex-1 text-sm font-mono break-all">
+                    {pendingRegistration?.wallet_address}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={handleCopyAddress}
+                  >
+                    {copiedAddress ? (
+                      <Check className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                <span className="text-sm text-muted-foreground">Balance</span>
+                {isCheckingBalance ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="text-sm font-semibold">
+                    {formatCryptoAmount(balance, 6)} ETH
+                  </span>
+                )}
+              </div>
+
+              {!hasEnoughBalance && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    You need at least 0.001 ETH to complete registration. Send
+                    ETH to the address above.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {hasEnoughBalance && (
+                <Alert className="border-green-500 bg-green-500/10">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-600">
+                    You have enough ETH! You can now complete your registration.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Pending Registration</AlertTitle>
@@ -224,16 +350,6 @@ export default function CompleteRegistrationPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
-          {!isConnected && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Wallet Not Connected</AlertTitle>
-              <AlertDescription>
-                Please connect your wallet to complete the registration.
-              </AlertDescription>
-            </Alert>
-          )}
         </div>
       </div>
 
@@ -242,7 +358,9 @@ export default function CompleteRegistrationPage() {
           type="button"
           onClick={handleCompleteRegistration}
           className="w-full"
-          disabled={isCompleting || !isConnected || !pendingRegistration}
+          disabled={
+            isCompleting || !pendingRegistration || !hasEnoughBalance || !signer
+          }
         >
           {isCompleting ? (
             <>

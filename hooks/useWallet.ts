@@ -10,32 +10,56 @@ import { ethers } from "ethers";
 import { BASE_CHAIN_ID } from "@/lib/constants";
 
 export function useWallet() {
-  const { authenticated, user } = usePrivy();
+  const { authenticated, user, ready } = usePrivy();
   const { wallets } = useWallets();
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
   const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function setupWallet() {
-      if (!authenticated || !wallets || wallets.length === 0) {
+      setIsLoading(true);
+
+      if (!ready) {
+        return;
+      }
+
+      if (!authenticated) {
         setProvider(null);
         setSigner(null);
         setAddress(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const walletAddress = user?.wallet?.address;
+
+      if (!walletAddress) {
+        setProvider(null);
+        setSigner(null);
+        setAddress(null);
+        setIsLoading(false);
+        return;
+      }
+
+      setAddress(walletAddress);
+
+      if (!wallets || wallets.length === 0) {
+        setIsLoading(false);
         return;
       }
 
       try {
-        // Get the first wallet (embedded wallet)
         const wallet = wallets[0];
         const walletProvider = await wallet.getEthereumProvider();
 
         if (!walletProvider) {
           console.error("No Ethereum provider found");
+          setIsLoading(false);
           return;
         }
 
-        // Create ethers provider
         const ethersProvider = new ethers.BrowserProvider(
           walletProvider,
           BASE_CHAIN_ID
@@ -43,26 +67,30 @@ export function useWallet() {
 
         setProvider(ethersProvider);
 
-        // Get signer
         const ethersSigner = await ethersProvider.getSigner();
         setSigner(ethersSigner);
 
-        // Get address
         const signerAddress = await ethersSigner.getAddress();
-        setAddress(signerAddress);
+        if (signerAddress !== walletAddress) {
+          setAddress(signerAddress);
+        }
       } catch (error) {
         console.error("Error setting up wallet:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
     setupWallet();
-  }, [authenticated, wallets]);
+  }, [authenticated, wallets, user, ready]);
 
   return {
     provider,
     signer,
-    address,
-    walletAddress: user?.wallet?.address || address,
-    isConnected: authenticated && !!signer,
+    address: address || user?.wallet?.address || null,
+    walletAddress: user?.wallet?.address || address || null,
+    isConnected: authenticated && !!signer && !!address,
+    isLoading,
+    ready,
   };
 }
