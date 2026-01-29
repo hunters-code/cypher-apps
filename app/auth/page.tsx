@@ -1,19 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useLoginWithEmail, useLoginWithSms } from "@privy-io/react-auth";
+import {
+  usePrivy,
+  useLoginWithEmail,
+  useLoginWithSms,
+} from "@privy-io/react-auth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { hasSession } from "@/lib/utils/session";
 
 export default function AuthPage() {
   const router = useRouter();
+  const { ready } = usePrivy();
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +27,12 @@ export default function AuthPage() {
   const { setContactValue, setLoginMethod } = useAuth();
   const { sendCode: sendEmailCode } = useLoginWithEmail();
   const { sendCode: sendSmsCode } = useLoginWithSms();
+
+  useEffect(() => {
+    if (ready && hasSession()) {
+      router.push("/dashboard");
+    }
+  }, [ready, router]);
 
   const validateInput = (value: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -85,6 +97,10 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
+
+  if (ready && hasSession()) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">

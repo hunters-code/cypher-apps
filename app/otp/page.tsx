@@ -16,6 +16,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { getUsername } from "@/lib/blockchain";
+import { saveSession, hasSession } from "@/lib/utils/session";
 
 export default function OTPPage() {
   const router = useRouter();
@@ -33,23 +34,27 @@ export default function OTPPage() {
     state,
   } = useLoginWithEmail({
     onComplete: async (params) => {
-      // Check if user has a registered username on the blockchain
       let hasUsername = false;
+      let registeredUsername = "";
 
       if (provider && user?.wallet?.address) {
         try {
           const username = await getUsername(provider, user.wallet.address);
-          hasUsername = !!username && username.length > 0;
+          if (username && username.length > 0) {
+            hasUsername = true;
+            registeredUsername = username;
+          }
         } catch {
-          // User not registered yet
           hasUsername = false;
         }
       }
 
-      // Redirect based on registration status
       if (params.isNewUser || !hasUsername) {
         router.push("/onboarding");
       } else {
+        if (user?.wallet?.address && registeredUsername) {
+          saveSession(user.wallet.address, `@${registeredUsername}`);
+        }
         router.push("/dashboard");
       }
     },
@@ -78,6 +83,12 @@ export default function OTPPage() {
       router.push("/auth");
     }
   }, [contactValue, router]);
+
+  useEffect(() => {
+    if (hasSession()) {
+      router.push("/dashboard");
+    }
+  }, [router]);
 
   return (
     <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">

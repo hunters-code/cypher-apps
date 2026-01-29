@@ -4,11 +4,13 @@ import { useState, useMemo, useRef, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { Search, ChevronDown } from "lucide-react";
 
 import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { hasSession } from "@/lib/utils/session";
 
 interface Transaction {
   id: string;
@@ -88,6 +90,7 @@ const ITEMS_PER_PAGE = 5;
 
 export default function HistoryPage() {
   const router = useRouter();
+  const { authenticated, ready } = usePrivy();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("All Types");
   const [selectedToken, setSelectedToken] = useState<string>("All Tokens");
@@ -172,6 +175,16 @@ export default function HistoryPage() {
   const handleTransactionClick = (transaction: Transaction) => {
     router.push(`/transaction/${transaction.id}`);
   };
+
+  useEffect(() => {
+    if (ready && (!authenticated || !hasSession())) {
+      router.push("/auth");
+    }
+  }, [ready, authenticated, router]);
+
+  if (ready && (!authenticated || !hasSession())) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">

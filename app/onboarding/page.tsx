@@ -4,26 +4,32 @@ import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { Check, X, Loader2 } from "lucide-react";
 
 import { PINInput } from "@/components/auth/PINInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useUsername } from "@/hooks/useUsername";
 import { useWallet } from "@/hooks/useWallet";
+import { getUsername } from "@/lib/blockchain";
 import { deriveMetaKeys } from "@/lib/blockchain/meta-keys";
 import { hashPIN, storePINHash } from "@/lib/utils/pin";
+import { hasSession, saveSession } from "@/lib/utils/session";
 import { getOrCreateWalletSignature } from "@/lib/utils/wallet-signature";
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { authenticated, user, ready } = usePrivy();
   const [username, setUsername] = useState("");
   const [step, setStep] = useState<
     "username" | "pin" | "signing" | "registering"
   >("username");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
   const { checkAvailability, isChecking, availability } = useUsername();
   const {
     signer,
@@ -32,8 +38,43 @@ export default function OnboardingPage() {
     walletAddress,
     isLoading: isWalletLoading,
   } = useWallet();
+  const provider = useBaseProvider();
 
-  // Debounced username availability check
+  useEffect(() => {
+    async function checkUserRegistration() {
+      if (!ready) {
+        return;
+      }
+
+      if (hasSession()) {
+        router.push("/dashboard");
+        return;
+      }
+
+      if (!authenticated || !user?.wallet?.address || !provider) {
+        setIsCheckingRegistration(false);
+        return;
+      }
+
+      try {
+        const registeredUsername = await getUsername(
+          provider,
+          user.wallet.address
+        );
+        if (registeredUsername && registeredUsername.length > 0) {
+          saveSession(user.wallet.address, `@${registeredUsername}`);
+          router.push("/dashboard");
+          return;
+        }
+      } catch {
+      } finally {
+        setIsCheckingRegistration(false);
+      }
+    }
+
+    checkUserRegistration();
+  }, [ready, authenticated, user, provider, router]);
+
   useEffect(() => {
     if (!username.trim() || username.length < 3) {
       return;
@@ -179,6 +220,8 @@ export default function OnboardingPage() {
 
       localStorage.setItem("cypher_username", `@${cleanUsername}`);
 
+      saveSession(walletAddr, `@${cleanUsername}`);
+
       router.push("/dashboard");
     } catch (err) {
       console.error("Registration error:", err);
@@ -212,6 +255,17 @@ export default function OnboardingPage() {
       router.back();
     }
   };
+
+  if (isCheckingRegistration) {
+    return (
+      <div className="flex flex-col justify-center items-center gap-4 text-center h-full w-full py-32 px-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-base text-muted-foreground">
+          Checking registration...
+        </p>
+      </div>
+    );
+  }
 
   if (step === "username") {
     return (

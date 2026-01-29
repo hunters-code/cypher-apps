@@ -32,13 +32,14 @@ import {
   markPendingRegistrationAsCompleted,
 } from "@/lib/supabase/pending-registration";
 import { formatCryptoAmount } from "@/lib/utils/format";
+import { saveSession } from "@/lib/utils/session";
 import type { PendingRegistration } from "@/types/pending-registration";
 
 export default function CompleteRegistrationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const username = searchParams.get("username");
-  const { signer } = useWallet();
+  const { signer, address, walletAddress } = useWallet();
 
   const [pendingRegistration, setPendingRegistration] =
     useState<PendingRegistration | null>(null);
@@ -162,6 +163,11 @@ export default function CompleteRegistrationPage() {
         "cypher_username",
         `@${pendingRegistration.username}`
       );
+
+      const walletAddr = address || walletAddress;
+      if (walletAddr) {
+        saveSession(walletAddr, `@${pendingRegistration.username}`);
+      }
 
       setSuccess(true);
 

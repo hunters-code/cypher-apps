@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { QrCode, Copy, Check, Share2, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { hasSession } from "@/lib/utils/session";
 
 export default function ReceivePage() {
   const router = useRouter();
+  const { authenticated, ready } = usePrivy();
   const [copiedId, setCopiedId] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [username] = useState(() => {
@@ -54,6 +57,16 @@ export default function ReceivePage() {
     router.push("/dashboard");
   };
 
+  useEffect(() => {
+    if (ready && (!authenticated || !hasSession())) {
+      router.push("/auth");
+    }
+  }, [ready, authenticated, router]);
+
+  if (ready && (!authenticated || !hasSession())) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex-1 overflow-y-auto">
@@ -68,7 +81,7 @@ export default function ReceivePage() {
 
             <div className="space-y-4 w-full">
               <div className="flex justify-center">
-                <div className="border-2 border-dashed border-primary/30 rounded-xl p-4 sm:p-6 bg-gradient-to-br from-primary/5 to-primary/10 w-full max-w-xs">
+                <div className="border-2 border-dashed border-primary/30 rounded-xl p-4 sm:p-6 bg-linear-to-br from-primary/5 to-primary/10 w-full max-w-xs">
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <div className="p-3 sm:p-4 bg-background rounded-lg">
                       <QrCode className="h-24 w-24 sm:h-32 sm:w-32 text-foreground" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -31,6 +31,7 @@ import {
   ItemSeparator,
 } from "@/components/ui/item";
 import { Switch } from "@/components/ui/switch";
+import { hasSession, clearSession } from "@/lib/utils/session";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -38,7 +39,13 @@ export default function SettingsPage() {
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedUsername, setCopiedUsername] = useState(false);
 
-  const { logout } = usePrivy();
+  const { logout, authenticated, ready } = usePrivy();
+
+  useEffect(() => {
+    if (ready && (!authenticated || !hasSession())) {
+      router.push("/auth");
+    }
+  }, [ready, authenticated, router]);
 
   const username = "@nashirjamali";
   const walletAddress = "0x9a3d6c5f8e2b1a7c4d9e8f3b2a1c6d5e4f3a2b1c";
@@ -64,9 +71,14 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
+    clearSession();
     await logout();
     router.push("/");
   };
+
+  if (ready && (!authenticated || !hasSession())) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { QrCode, Lock, Loader2, Check, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { getAddress } from "@/lib/blockchain";
+import { hasSession } from "@/lib/utils/session";
 
 export default function SendPage() {
   const router = useRouter();
+  const { authenticated, ready } = usePrivy();
   const provider = useBaseProvider();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
@@ -103,6 +106,16 @@ export default function SendPage() {
   const handleBack = () => {
     router.push("/dashboard");
   };
+
+  useEffect(() => {
+    if (ready && (!authenticated || !hasSession())) {
+      router.push("/auth");
+    }
+  }, [ready, authenticated, router]);
+
+  if (ready && (!authenticated || !hasSession())) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col justify-between items-center gap-4 h-full w-full py-16 px-8">
