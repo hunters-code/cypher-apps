@@ -47,3 +47,9 @@ export {
   announceStealthTransaction,
   listenForAnnouncements,
 } from "./announcement";
+
+// Meta Keys (Deterministic Key Derivation)
+export { deriveMetaKeys, type MetaKeys } from "./meta-keys";
+
+// Recovery Functions
+export { recoverMetaKeys } from "./recovery";
