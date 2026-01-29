@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/input-otp";
 import { useAuth } from "@/hooks/useAuth";
 import { useBaseProvider } from "@/hooks/useBlockchain";
-import { getUsername } from "@/lib/blockchain";
+// import { getUsername } from "@/lib/blockchain";
 import { saveSession, hasSession } from "@/lib/utils/session";
 
 export default function OTPPage() {
@@ -39,7 +39,14 @@ export default function OTPPage() {
 
       if (provider && user?.wallet?.address) {
         try {
-          const username = await getUsername(provider, user.wallet.address);
+          /*
+            should be getting username using stealth address
+            for now, assume if username is already registered, it will exist in localStorage
+          */
+
+          // const username = await getUsername(provider, user.wallet.address);
+          const username = localStorage.getItem("cypher_username") || "";
+
           if (username && username.length > 0) {
             hasUsername = true;
             registeredUsername = username;
