@@ -22,7 +22,7 @@ export default function SendPage() {
   const { authenticated, ready } = usePrivy();
   const provider = useBaseProvider();
   const { checkAvailability, isChecking } = useUsername();
-  const { balances, isLoading: isLoadingBalances } = useTokenBalances(["CDT"]);
+  const { balances, isLoading: isLoadingBalances } = useTokenBalances();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [isPrivate, setIsPrivate] = useState(true);

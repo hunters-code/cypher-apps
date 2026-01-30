@@ -9,6 +9,7 @@ export interface Asset {
   name: string;
   amount: string;
   usdValue: string;
+  logoURI?: string;
 }
 
 interface AssetListProps {
@@ -41,6 +42,7 @@ export function AssetList({
             name={asset.name}
             amount={asset.amount}
             usdValue={asset.usdValue}
+            logoURI={asset.logoURI}
             onClick={() => onAssetClick?.(asset)}
           />
         ))}

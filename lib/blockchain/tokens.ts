@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 import { scanForIncomingTransfers } from "./scanner";
+import { AvailableToken } from "../constants/tokens";
 
 export interface TokenInfo {
   symbol: string;
@@ -50,7 +51,8 @@ export async function getNativeBalance(
   address: string
 ): Promise<string> {
   try {
-    const balance = await provider.getBalance(address);
+    const normalizedAddress = ethers.getAddress(address);
+    const balance = await provider.getBalance(normalizedAddress);
     return ethers.formatEther(balance);
   } catch (error) {
     console.error("Error fetching native balance:", error);
@@ -65,12 +67,16 @@ export async function getERC20Balance(
   decimals: number
 ): Promise<string> {
   try {
+    const normalizedAddress = ethers.getAddress(userAddress);
+    const normalizedTokenAddress = ethers.getAddress(tokenAddress);
+
     const tokenContract = new ethers.Contract(
-      tokenAddress,
+      normalizedTokenAddress,
       ERC20_ABI,
       provider
     );
-    const balance = await tokenContract.balanceOf(userAddress);
+    const balance = await tokenContract.balanceOf(normalizedAddress);
+
     return ethers.formatUnits(balance, decimals);
   } catch (error) {
     console.error("Error fetching ERC20 balance:", error);
@@ -80,7 +86,7 @@ export async function getERC20Balance(
 
 export async function getTokenBalance(
   provider: ethers.Provider,
-  tokenInfo: TokenInfo,
+  tokenInfo: AvailableToken,
   userAddress: string
 ): Promise<string> {
   if (tokenInfo.address === "native") {
@@ -96,7 +102,7 @@ export async function getTokenBalance(
 
 export async function getMultipleTokenBalances(
   provider: ethers.Provider,
-  tokens: TokenInfo[],
+  tokens: AvailableToken[],
   userAddress: string
 ): Promise<Record<string, string>> {
   const balances: Record<string, string> = {};
@@ -146,7 +152,7 @@ export async function getStealthAddresses(
 
 export async function getTokenBalanceWithStealth(
   provider: ethers.Provider,
-  tokenInfo: TokenInfo,
+  tokenInfo: AvailableToken,
   mainAddress: string,
   stealthAddresses: string[]
 ): Promise<string> {
@@ -189,7 +195,7 @@ export async function getTokenBalanceWithStealth(
 
 export async function getMultipleTokenBalancesWithStealth(
   provider: ethers.Provider,
-  tokens: TokenInfo[],
+  tokens: AvailableToken[],
   mainAddress: string,
   viewingKeyPrivate: string | null,
   fromBlock: number = 0
