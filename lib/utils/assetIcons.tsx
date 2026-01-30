@@ -2,6 +2,20 @@ import { ComponentType } from "react";
 
 import { Coins, DollarSign, LucideIcon } from "lucide-react";
 
+function FirstLetterIcon({
+  letter,
+  className,
+}: {
+  letter: string;
+  className?: string;
+}) {
+  return (
+    <span className={`text-xs font-semibold text-foreground ${className}`}>
+      {letter}
+    </span>
+  );
+}
+
 import { BTCIcon } from "@/components/icons/BTCIcon";
 import { ETHIcon } from "@/components/icons/ETHIcon";
 import { USDCIcon } from "@/components/icons/USDCIcon";
@@ -47,8 +61,25 @@ const assetIconsMap: Record<string, AssetIconConfig> = {
   },
 };
 
-export function getAssetIcon(symbol: string): AssetIconConfig {
+export function getAssetIcon(
+  symbol: string,
+  logoURI?: string,
+  name?: string
+): AssetIconConfig {
   const upperSymbol = symbol.toUpperCase();
+
+  if (!logoURI && name) {
+    const firstLetter = name.split(" ")[0].charAt(0).toUpperCase();
+    return {
+      icon: ({ className }: { className?: string }) => (
+        <FirstLetterIcon letter={firstLetter} className={className} />
+      ),
+      color: "text-foreground",
+      bgColor: "bg-muted/20",
+      isCustomIcon: true,
+    };
+  }
+
   return (
     assetIconsMap[upperSymbol] || {
       icon: Coins,

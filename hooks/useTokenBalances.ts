@@ -1,12 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useWallet } from "@/hooks/useWallet";
-import {
-  BASE_TOKENS,
-  getMultipleTokenBalancesWithStealth,
-  type TokenInfo,
-} from "@/lib/blockchain/tokens";
+import { getMultipleTokenBalancesWithStealth } from "@/lib/blockchain/tokens";
+import { AVAILABLE_TOKENS } from "@/lib/constants/tokens";
 
 export interface TokenBalance {
   symbol: string;
@@ -15,7 +12,7 @@ export interface TokenBalance {
   decimals: number;
 }
 
-export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
+export function useTokenBalances(): {
   balances: TokenBalance[];
   isLoading: boolean;
   error: string | null;
@@ -26,12 +23,6 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
   const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const tokenSymbolsString = useMemo(
-    () => JSON.stringify([...tokenSymbols].sort()),
-    [tokenSymbols]
-  );
-  const tokenSymbolsRef = useRef(tokenSymbolsString);
 
   const getViewingKeyPrivate = useCallback((): string | null => {
     if (typeof window === "undefined") return null;
@@ -59,11 +50,6 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
     setError(null);
 
     try {
-      const currentSymbols = JSON.parse(tokenSymbolsRef.current) as string[];
-      const tokens: TokenInfo[] = currentSymbols
-        .map((symbol) => BASE_TOKENS[symbol])
-        .filter((token): token is TokenInfo => token !== undefined);
-
       const viewingKeyPrivate = getViewingKeyPrivate();
 
       const lastScannedBlock = localStorage.getItem("lastScannedBlock");
@@ -71,13 +57,13 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
 
       const balanceMap = await getMultipleTokenBalancesWithStealth(
         provider,
-        tokens,
+        AVAILABLE_TOKENS,
         address,
         viewingKeyPrivate,
         fromBlock
       );
 
-      const balanceList: TokenBalance[] = tokens.map((token) => ({
+      const balanceList: TokenBalance[] = AVAILABLE_TOKENS.map((token) => ({
         symbol: token.symbol,
         name: token.name,
         amount: balanceMap[token.symbol] || "0",
@@ -96,14 +82,8 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
   }, [provider, address, getViewingKeyPrivate]);
 
   useEffect(() => {
-    if (tokenSymbolsRef.current !== tokenSymbolsString) {
-      tokenSymbolsRef.current = tokenSymbolsString;
-    }
-  }, [tokenSymbolsString]);
-
-  useEffect(() => {
     fetchBalances();
-  }, [fetchBalances, tokenSymbolsString]);
+  }, [fetchBalances]);
 
   return {
     balances,
