@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 export function formatCurrency(
   amount: number | string,
   currency: string = "USD",
@@ -41,26 +43,74 @@ export function formatBalance(amount: number | string): string {
 
 export function formatCryptoAmount(
   amount: number | string,
-  decimals: number = 4
+  displayDecimals: number = 4,
+  tokenDecimals: number = 18
 ): string {
-  const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+  const amountStr = typeof amount === "string" ? amount : amount.toString();
+  const trimmed = amountStr.trim();
 
-  if (isNaN(numAmount)) {
+  if (!trimmed || trimmed === "0" || trimmed === "0.0" || trimmed === "0.00") {
     return "0.00";
   }
 
-  if (numAmount === 0) {
+  if (trimmed === "NaN" || trimmed === "Infinity") {
     return "0.00";
   }
 
-  if (numAmount < 0.0001) {
-    return "<0.0001";
-  }
+  try {
+    let formattedValue: string;
 
-  return numAmount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: decimals,
-  });
+    if (
+      !trimmed.includes(".") &&
+      /^\d+$/.test(trimmed) &&
+      trimmed.length > 10
+    ) {
+      formattedValue = ethers.formatUnits(trimmed, tokenDecimals);
+    } else {
+      const numValue = typeof amount === "string" ? parseFloat(amount) : amount;
+
+      if (isNaN(numValue)) {
+        return "0.00";
+      }
+
+      if (numValue === 0) {
+        return "0.00";
+      }
+
+      formattedValue = numValue.toString();
+    }
+
+    const numFormatted = parseFloat(formattedValue);
+
+    if (isNaN(numFormatted) || numFormatted === 0) {
+      return "0.00";
+    }
+
+    if (numFormatted < 0.0001 && numFormatted > 0) {
+      return "<0.0001";
+    }
+
+    const dotIndex = formattedValue.indexOf(".");
+    const integerPart =
+      dotIndex === -1 ? formattedValue : formattedValue.substring(0, dotIndex);
+    let decimalPart =
+      dotIndex === -1 ? "" : formattedValue.substring(dotIndex + 1);
+
+    if (decimalPart.length > displayDecimals) {
+      decimalPart = decimalPart.substring(0, displayDecimals);
+    } else {
+      decimalPart = decimalPart.padEnd(displayDecimals, "0");
+    }
+
+    const formattedInteger = parseFloat(integerPart).toLocaleString("en-US", {
+      maximumFractionDigits: 0,
+    });
+
+    return `${formattedInteger}.${decimalPart}`;
+  } catch (error) {
+    console.error("Error formatting crypto amount:", error);
+    return "0.00";
+  }
 }
 
 export function formatUSDValue(amount: number | string): string {

@@ -6,11 +6,24 @@ interface AssetItemProps {
   name: string;
   amount: string;
   usdValue: string;
+  logoURI?: string;
   onClick?: () => void;
 }
 
-export function AssetItem({ symbol, name, amount, usdValue, onClick }: AssetItemProps) {
-  const { icon: Icon, color, bgColor, isCustomIcon = false } = getAssetIcon(symbol);
+export function AssetItem({
+  symbol,
+  name,
+  amount,
+  usdValue,
+  logoURI,
+  onClick,
+}: AssetItemProps) {
+  const {
+    icon: Icon,
+    color,
+    bgColor,
+    isCustomIcon = false,
+  } = getAssetIcon(symbol, logoURI, name);
   const formattedAmount = formatCryptoAmount(amount);
   const formattedUSDValue = formatUSDValue(usdValue);
 
@@ -34,11 +47,14 @@ export function AssetItem({ symbol, name, amount, usdValue, onClick }: AssetItem
           </div>
         </div>
         <div className="flex flex-col items-end gap-0.5">
-          <span className="text-sm font-medium">{formattedAmount} {symbol}</span>
-          <span className="text-xs text-muted-foreground">{formattedUSDValue}</span>
+          <span className="text-sm font-medium">
+            {formattedAmount} {symbol}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {formattedUSDValue}
+          </span>
         </div>
       </div>
     </div>
   );
 }
-

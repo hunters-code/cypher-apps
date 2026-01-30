@@ -1,41 +1,7 @@
 import { ethers } from "ethers";
 
 import { scanForIncomingTransfers } from "./scanner";
-
-export interface TokenInfo {
-  symbol: string;
-  name: string;
-  address: string;
-  decimals: number;
-  logoURI?: string;
-}
-
-export const BASE_TOKENS: Record<string, TokenInfo> = {
-  ETH: {
-    symbol: "ETH",
-    name: "Ethereum",
-    address: "native",
-    decimals: 18,
-  },
-  USDC: {
-    symbol: "USDC",
-    name: "USD Coin",
-    address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    decimals: 6,
-  },
-  WETH: {
-    symbol: "WETH",
-    name: "Wrapped Ethereum",
-    address: "0x4200000000000000000000000000000000000006",
-    decimals: 18,
-  },
-  CDT: {
-    symbol: "CDT",
-    name: "Cypher Demo Token",
-    address: "0xE72599Fe9cD2FF2fc590bbC8b92e271FbB4945D5",
-    decimals: 18,
-  },
-};
+import { AvailableToken } from "../constants/tokens";
 
 const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
@@ -49,7 +15,8 @@ export async function getNativeBalance(
   address: string
 ): Promise<string> {
   try {
-    const balance = await provider.getBalance(address);
+    const normalizedAddress = ethers.getAddress(address);
+    const balance = await provider.getBalance(normalizedAddress);
     return ethers.formatEther(balance);
   } catch (error) {
     console.error("Error fetching native balance:", error);
@@ -64,12 +31,16 @@ export async function getERC20Balance(
   decimals: number
 ): Promise<string> {
   try {
+    const normalizedAddress = ethers.getAddress(userAddress);
+    const normalizedTokenAddress = ethers.getAddress(tokenAddress);
+
     const tokenContract = new ethers.Contract(
-      tokenAddress,
+      normalizedTokenAddress,
       ERC20_ABI,
       provider
     );
-    const balance = await tokenContract.balanceOf(userAddress);
+    const balance = await tokenContract.balanceOf(normalizedAddress);
+
     return ethers.formatUnits(balance, decimals);
   } catch (error) {
     console.error("Error fetching ERC20 balance:", error);
@@ -79,7 +50,7 @@ export async function getERC20Balance(
 
 export async function getTokenBalance(
   provider: ethers.Provider,
-  tokenInfo: TokenInfo,
+  tokenInfo: AvailableToken,
   userAddress: string
 ): Promise<string> {
   if (tokenInfo.address === "native") {
@@ -95,7 +66,7 @@ export async function getTokenBalance(
 
 export async function getMultipleTokenBalances(
   provider: ethers.Provider,
-  tokens: TokenInfo[],
+  tokens: AvailableToken[],
   userAddress: string
 ): Promise<Record<string, string>> {
   const balances: Record<string, string> = {};
@@ -145,7 +116,7 @@ export async function getStealthAddresses(
 
 export async function getTokenBalanceWithStealth(
   provider: ethers.Provider,
-  tokenInfo: TokenInfo,
+  tokenInfo: AvailableToken,
   mainAddress: string,
   stealthAddresses: string[]
 ): Promise<string> {
@@ -188,7 +159,7 @@ export async function getTokenBalanceWithStealth(
 
 export async function getMultipleTokenBalancesWithStealth(
   provider: ethers.Provider,
-  tokens: TokenInfo[],
+  tokens: AvailableToken[],
   mainAddress: string,
   viewingKeyPrivate: string | null,
   fromBlock: number = 0
