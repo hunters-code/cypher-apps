@@ -29,24 +29,18 @@ export async function announceStealthTransaction(
       signer
     );
 
-    // Convert stealth address to bytes32
-    const stealthAddressBytes32 = ethers.zeroPadValue(
-      ethers.getBytes(stealthAddress),
-      32
-    );
-
     // Convert ephemeral public key to bytes
     const ephemeralKeyBytes = ethers.isHexString(ephemeralPublicKey)
       ? ephemeralPublicKey
       : ethers.toUtf8Bytes(ephemeralPublicKey);
 
-    // Encode metadata as JSON string, then to bytes
+    // Encode metadata as JSON string, then to bytes (hex string format)
     const metadataBytes = metadata
       ? ethers.toUtf8Bytes(JSON.stringify(metadata))
       : "0x";
 
     const tx = await announcementContract.announce(
-      stealthAddressBytes32,
+      stealthAddress,
       ephemeralKeyBytes,
       metadataBytes
     );

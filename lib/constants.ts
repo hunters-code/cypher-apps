@@ -78,7 +78,7 @@ export const ANNOUNCEMENT_ABI = [
     type: "function",
     stateMutability: "nonpayable",
     inputs: [
-      { name: "stealthAddress", type: "bytes32" },
+      { name: "stealthAddress", type: "address" },
       { name: "ephemeralPublicKey", type: "bytes" },
       { name: "metadata", type: "bytes" },
     ],

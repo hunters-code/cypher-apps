@@ -4,17 +4,18 @@ import { Suspense, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { ethers } from "ethers";
 import { Lock, ArrowRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useBaseProvider, getSigner } from "@/hooks/useBlockchain";
+import { useBaseProvider } from "@/hooks/useBlockchain";
+import { useWallet } from "@/hooks/useWallet";
 import {
   getViewingKey,
   getAddress,
   generateStealthAddress,
   announceStealthTransaction,
 } from "@/lib/blockchain";
+import { BASE_TOKENS, sendToken } from "@/lib/blockchain/tokens";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 
@@ -22,6 +23,7 @@ function SendConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const provider = useBaseProvider();
+  const { signer } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,6 +35,10 @@ function SendConfirmContent() {
   const fee = searchParams.get("fee") || "0.0002";
   const feeUSD = searchParams.get("feeUSD") || "0.36";
 
+  // Get token info
+  const tokenInfo = BASE_TOKENS[token];
+  // const isNativeToken = !tokenInfo || tokenInfo.address === "native";
+
   const handleConfirm = async () => {
     setIsLoading(true);
     setError("");
@@ -42,7 +48,6 @@ function SendConfirmContent() {
         throw new Error("Provider not available");
       }
 
-      const signer = await getSigner();
       if (!signer) {
         throw new Error("Please connect your wallet");
       }
@@ -63,30 +68,39 @@ function SendConfirmContent() {
         stealthAddress = stealthResult.stealthAddress;
         ephemeralPublicKey = stealthResult.ephemeralPublicKey;
 
-        // Send ETH to stealth address
-        const tx = await signer.sendTransaction({
-          to: stealthAddress,
-          value: ethers.parseEther(amount),
-        });
+        // Send token to stealth address
+        const receipt = await sendToken(
+          signer,
+          tokenInfo,
+          stealthAddress,
+          amount
+        );
 
-        const receipt = await tx.wait();
         if (!receipt) {
           throw new Error("Transaction failed");
         }
 
         txHash = receipt.hash;
 
-        // Announce the stealth transaction
-        await announceStealthTransaction(
-          signer,
-          stealthAddress,
-          ephemeralPublicKey,
-          {
-            amount,
-            tokenSymbol: token,
-            message: `Private transfer to ${recipient}`,
-          }
-        );
+        // Announce the stealth transaction (optional, non-blocking)
+        try {
+          await announceStealthTransaction(
+            signer,
+            stealthAddress,
+            ephemeralPublicKey,
+            {
+              amount,
+              tokenSymbol: token,
+              message: `Private transfer to ${recipient}`,
+            }
+          );
+        } catch (announcementError) {
+          console.warn(
+            "Failed to announce stealth transaction:",
+            announcementError
+          );
+          // Continue anyway - the transfer already succeeded
+        }
       } else {
         // Regular transfer (public)
         let toAddress: string;
@@ -98,12 +112,9 @@ function SendConfirmContent() {
           toAddress = await getAddress(provider, cleanRecipient);
         }
 
-        const tx = await signer.sendTransaction({
-          to: toAddress,
-          value: ethers.parseEther(amount),
-        });
+        // Send token
+        const receipt = await sendToken(signer, tokenInfo, toAddress, amount);
 
-        const receipt = await tx.wait();
         if (!receipt) {
           throw new Error("Transaction failed");
         }
