@@ -118,7 +118,11 @@ export async function POST(request: Request) {
     );
 
     const viewingKeyBytes = ethers.getBytes(viewingKey);
-    const tx = await registry.registerID(username, viewingKeyBytes);
+    const tx = await registry.registerID(
+      walletAddress,
+      username,
+      viewingKeyBytes
+    );
     const receipt = await tx.wait();
 
     if (!receipt) {
@@ -133,17 +137,56 @@ export async function POST(request: Request) {
       blockNumber: receipt.blockNumber,
     });
   } catch (error) {
-    console.error("Registration error:", error);
-
     if (error instanceof Error) {
-      if (error.message.includes("already registered")) {
+      const errorMessage = error.message.toLowerCase();
+      const errorString = String(error).toLowerCase();
+
+      if (
+        errorMessage.includes("already registered") ||
+        errorString.includes("already registered") ||
+        errorMessage.includes("address already registered") ||
+        errorString.includes("address already registered")
+      ) {
         return NextResponse.json(
-          { error: "Username is already registered" },
+          { error: "This wallet address is already registered" },
           { status: 400 }
         );
       }
 
-      if (error.message.includes("insufficient funds")) {
+      if (
+        errorMessage.includes("viewing key already registered") ||
+        errorString.includes("viewing key already registered")
+      ) {
+        return NextResponse.json(
+          { error: "Viewing key is already registered" },
+          { status: 400 }
+        );
+      }
+
+      if (
+        errorMessage.includes("username already taken") ||
+        errorString.includes("username already taken")
+      ) {
+        return NextResponse.json(
+          { error: "Username is already taken" },
+          { status: 400 }
+        );
+      }
+
+      if (
+        errorMessage.includes("invalid viewing key length") ||
+        errorString.includes("invalid viewing key length")
+      ) {
+        return NextResponse.json(
+          { error: "Invalid viewing key format" },
+          { status: 400 }
+        );
+      }
+
+      if (
+        errorMessage.includes("insufficient funds") ||
+        errorString.includes("insufficient funds")
+      ) {
         return NextResponse.json(
           { error: "Insufficient funds for gas" },
           { status: 500 }

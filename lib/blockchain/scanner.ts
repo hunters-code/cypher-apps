@@ -108,8 +108,16 @@ export async function scanForIncomingTransfers(
 
     return matchingEvents;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (
+      errorMessage.includes("no backend is currently healthy") ||
+      errorMessage.includes("UNKNOWN_ERROR") ||
+      errorMessage.includes("could not coalesce error")
+    ) {
+      return [];
+    }
     console.error("Error scanning for incoming transfers:", error);
-    throw error;
+    return [];
   }
 }
 

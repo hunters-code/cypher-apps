@@ -49,12 +49,14 @@ export async function deriveMetaKeys(
   pin: string
 ): Promise<MetaKeys> {
   const viewSeedInput = ethers.concat([
+    ethers.getBytes(walletAddress),
     ethers.toUtf8Bytes(walletSignature),
     ethers.toUtf8Bytes(pin),
     ethers.toUtf8Bytes(VIEW_DOMAIN),
   ]);
 
   const spendSeedInput = ethers.concat([
+    ethers.getBytes(walletAddress),
     ethers.toUtf8Bytes(walletSignature),
     ethers.toUtf8Bytes(pin),
     ethers.toUtf8Bytes(SPEND_DOMAIN),

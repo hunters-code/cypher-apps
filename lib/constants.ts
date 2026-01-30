@@ -23,6 +23,7 @@ export const REGISTRY_ABI = [
     type: "function",
     stateMutability: "nonpayable",
     inputs: [
+      { name: "userAddress", type: "address" },
       { name: "username", type: "string" },
       { name: "viewingKeyPublic", type: "bytes" },
     ],

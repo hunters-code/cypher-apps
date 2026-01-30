@@ -29,6 +29,12 @@ export const BASE_TOKENS: Record<string, TokenInfo> = {
     address: "0x4200000000000000000000000000000000000006",
     decimals: 18,
   },
+  CDT: {
+    symbol: "CDT",
+    name: "Cypher Demo Token",
+    address: "0xE72599Fe9cD2FF2fc590bbC8b92e271FbB4945D5",
+    decimals: 18,
+  },
 };
 
 const ERC20_ABI = [
@@ -124,6 +130,14 @@ export async function getStealthAddresses(
 
     return Array.from(stealthAddresses);
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (
+      errorMessage.includes("no backend is currently healthy") ||
+      errorMessage.includes("UNKNOWN_ERROR") ||
+      errorMessage.includes("could not coalesce error")
+    ) {
+      return [];
+    }
     console.error("Error getting stealth addresses:", error);
     return [];
   }

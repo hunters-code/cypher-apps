@@ -16,10 +16,12 @@ import { ROUTES } from "@/lib/constants/routes";
 import { formatCryptoAmount } from "@/lib/utils/format";
 import { hasSession } from "@/lib/utils/session";
 
+const CDT_TOKEN_SYMBOLS = ["CDT"];
+
 export default function DashboardPage() {
   const router = useRouter();
   const { authenticated, ready } = usePrivy();
-  const { balances, isLoading } = useTokenBalances(["ETH", "USDC"]);
+  const { balances, isLoading } = useTokenBalances(CDT_TOKEN_SYMBOLS);
 
   useEffect(() => {
     if (ready && (!authenticated || !hasSession())) {
@@ -39,9 +41,9 @@ export default function DashboardPage() {
   }, [balances]);
 
   const totalBalance = useMemo(() => {
-    const ethBalance = balances.find((b) => b.symbol === "ETH");
-    if (ethBalance) {
-      return formatCryptoAmount(ethBalance.amount, 2);
+    const cdtBalance = balances.find((b) => b.symbol === "CDT");
+    if (cdtBalance) {
+      return formatCryptoAmount(cdtBalance.amount, 2);
     }
     return "0.00";
   }, [balances]);
@@ -63,7 +65,7 @@ export default function DashboardPage() {
             type: "SEND",
             username: "nashirjamali",
             amount: "1.0",
-            token: "ETH",
+            token: "CDT",
             timestamp: "2025-01-01",
             isPrivate: false,
           },
@@ -72,7 +74,7 @@ export default function DashboardPage() {
             type: "RECEIVE",
             username: "nashirjamali",
             amount: "1.0",
-            token: "ETH",
+            token: "CDT",
             timestamp: "2025-01-01",
             isPrivate: false,
           },

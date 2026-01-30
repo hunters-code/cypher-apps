@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useWallet } from "@/hooks/useWallet";
@@ -27,6 +27,12 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const tokenSymbolsString = useMemo(
+    () => JSON.stringify([...tokenSymbols].sort()),
+    [tokenSymbols]
+  );
+  const tokenSymbolsRef = useRef(tokenSymbolsString);
+
   const getViewingKeyPrivate = useCallback((): string | null => {
     if (typeof window === "undefined") return null;
 
@@ -53,7 +59,8 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
     setError(null);
 
     try {
-      const tokens: TokenInfo[] = tokenSymbols
+      const currentSymbols = JSON.parse(tokenSymbolsRef.current) as string[];
+      const tokens: TokenInfo[] = currentSymbols
         .map((symbol) => BASE_TOKENS[symbol])
         .filter((token): token is TokenInfo => token !== undefined);
 
@@ -86,11 +93,17 @@ export function useTokenBalances(tokenSymbols: string[] = ["ETH", "USDC"]): {
     } finally {
       setIsLoading(false);
     }
-  }, [provider, address, tokenSymbols, getViewingKeyPrivate]);
+  }, [provider, address, getViewingKeyPrivate]);
+
+  useEffect(() => {
+    if (tokenSymbolsRef.current !== tokenSymbolsString) {
+      tokenSymbolsRef.current = tokenSymbolsString;
+    }
+  }, [tokenSymbolsString]);
 
   useEffect(() => {
     fetchBalances();
-  }, [fetchBalances]);
+  }, [fetchBalances, tokenSymbolsString]);
 
   return {
     balances,
