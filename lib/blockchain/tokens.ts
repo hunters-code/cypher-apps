@@ -32,7 +32,7 @@ export const BASE_TOKENS: Record<string, TokenInfo> = {
   CDT: {
     symbol: "CDT",
     name: "Cypher Demo Token",
-    address: "0xE72599Fe9cD2FF2fc590bbC8b92e271FbB4945D5",
+    address: "0xF80eE164f12a6FdB48c0E58e321d100CdDA508bC",
     decimals: 18,
   },
 };
@@ -42,6 +42,7 @@ const ERC20_ABI = [
   "function decimals() view returns (uint8)",
   "function symbol() view returns (string)",
   "function name() view returns (string)",
+  "function transfer(address to, uint256 amount) returns (bool)",
 ] as const;
 
 export async function getNativeBalance(
@@ -217,4 +218,33 @@ export async function getMultipleTokenBalancesWithStealth(
   );
 
   return balances;
+}
+
+/**
+ * Send tokens (native or ERC20) to a recipient
+ */
+export async function sendToken(
+  signer: ethers.Signer,
+  tokenInfo: TokenInfo,
+  toAddress: string,
+  amount: string
+): Promise<ethers.TransactionReceipt | null> {
+  if (tokenInfo.address === "native") {
+    // Send native ETH
+    const tx = await signer.sendTransaction({
+      to: toAddress,
+      value: ethers.parseEther(amount),
+    });
+    return await tx.wait();
+  } else {
+    // Send ERC20 token
+    const tokenContract = new ethers.Contract(
+      tokenInfo.address,
+      ERC20_ABI,
+      signer
+    );
+    const amountInWei = ethers.parseUnits(amount, tokenInfo.decimals);
+    const tx = await tokenContract.transfer(toAddress, amountInWei);
+    return await tx.wait();
+  }
 }

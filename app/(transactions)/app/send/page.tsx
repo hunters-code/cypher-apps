@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBaseProvider } from "@/hooks/useBlockchain";
-import { getAddress } from "@/lib/blockchain";
+import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { useUsername } from "@/hooks/useUsername";
+// import { getAddress } from "@/lib/blockchain";
 import { ROUTES } from "@/lib/constants/routes";
 import { hasSession } from "@/lib/utils/session";
 
@@ -19,13 +21,20 @@ export default function SendPage() {
   const router = useRouter();
   const { authenticated, ready } = usePrivy();
   const provider = useBaseProvider();
+  const { checkAvailability, isChecking } = useUsername();
+  const { balances, isLoading: isLoadingBalances } = useTokenBalances(["CDT"]);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [isPrivate, setIsPrivate] = useState(true);
-  const [token] = useState("ETH");
+  const [token] = useState("CDT");
   const [isValidatingRecipient, setIsValidatingRecipient] = useState(false);
   const [recipientValid, setRecipientValid] = useState<boolean | null>(null);
   const [recipientError, setRecipientError] = useState("");
+  const [balanceError, setBalanceError] = useState("");
+
+  // Get CDT balance
+  const cdtBalance = balances.find((b) => b.symbol === "CDT");
+  const currentBalance = cdtBalance ? parseFloat(cdtBalance.amount) : 0;
 
   // Validate recipient (username or address)
   useEffect(() => {
@@ -49,21 +58,22 @@ export default function SendPage() {
           return;
         }
 
-        // Check if username exists
-        try {
-          const address = await getAddress(provider, cleanRecipient);
-          if (
-            address &&
-            address !== "0x0000000000000000000000000000000000000000"
-          ) {
-            setRecipientValid(true);
-          } else {
-            setRecipientValid(false);
-            setRecipientError("Username not found");
-          }
-        } catch {
+        // Check if username is available (meaning it does NOT exist)
+        // For sending, we want the username to be TAKEN (not available)
+        const isAvailable = await checkAvailability(cleanRecipient);
+
+        if (isAvailable === false) {
+          // Username is taken (registered), which is what we want for sending
+          setRecipientValid(true);
+          setRecipientError("");
+        } else if (isAvailable === true) {
+          // Username is available (not registered), cannot send to it
           setRecipientValid(false);
           setRecipientError("Username not found");
+        } else {
+          // Error or null result
+          setRecipientValid(false);
+          setRecipientError("Could not verify username");
         }
       } catch {
         setRecipientValid(false);
@@ -75,7 +85,28 @@ export default function SendPage() {
 
     const timeoutId = setTimeout(validateRecipient, 500);
     return () => clearTimeout(timeoutId);
-  }, [recipient, provider]);
+  }, [recipient, provider, checkAvailability]);
+
+  // Validate amount against balance
+  useEffect(() => {
+    if (!amount.trim()) {
+      setBalanceError("");
+      return;
+    }
+
+    const amountValue = parseFloat(amount);
+    if (isNaN(amountValue) || amountValue <= 0) {
+      setBalanceError("Invalid amount");
+      return;
+    }
+
+    if (amountValue > currentBalance) {
+      setBalanceError("Insufficient balance");
+      return;
+    }
+
+    setBalanceError("");
+  }, [amount, currentBalance]);
 
   const handleContinue = () => {
     if (!recipient.trim() || !amount.trim()) {
@@ -83,6 +114,10 @@ export default function SendPage() {
     }
 
     if (recipientValid === false || isValidatingRecipient) {
+      return;
+    }
+
+    if (balanceError) {
       return;
     }
 
@@ -158,7 +193,7 @@ export default function SendPage() {
               </p>
               {recipient.trim() && (
                 <div className="flex items-center gap-2 text-xs">
-                  {isValidatingRecipient ? (
+                  {isValidatingRecipient || isChecking ? (
                     <>
                       <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                       <span className="text-muted-foreground">Checking...</span>
@@ -193,23 +228,48 @@ export default function SendPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="flex-1"
+                min={0}
               />
-              <Button variant="outline">ETH</Button>
+              <Button variant="outline">CDT</Button>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>≈ $2,685.00 USD</span>
-              <span>Balance: 1.2458 ETH</span>
+              <span>
+                {isLoadingBalances
+                  ? "Loading balance..."
+                  : `Balance: ${currentBalance.toFixed(4)} CDT`}
+              </span>
             </div>
+            {balanceError && (
+              <p className="text-xs text-destructive text-right">
+                {balanceError}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAmount((currentBalance * 0.25).toFixed(4))}
+              disabled={isLoadingBalances || currentBalance === 0}
+            >
               25%
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAmount((currentBalance * 0.5).toFixed(4))}
+              disabled={isLoadingBalances || currentBalance === 0}
+            >
               50%
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAmount(currentBalance.toFixed(4))}
+              disabled={isLoadingBalances || currentBalance === 0}
+            >
               Max
             </Button>
           </div>
@@ -242,7 +302,7 @@ export default function SendPage() {
 
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-xs text-muted-foreground">
-              Estimated Fee: ~0.0002 ETH ($0.36)
+              Estimated Fee: ~0.0002 CDT ($0.36)
             </p>
           </div>
         </div>
@@ -255,7 +315,10 @@ export default function SendPage() {
             !recipient.trim() ||
             !amount.trim() ||
             recipientValid === false ||
-            isValidatingRecipient
+            isValidatingRecipient ||
+            isChecking ||
+            !!balanceError ||
+            isLoadingBalances
           }
           onClick={handleContinue}
         >
