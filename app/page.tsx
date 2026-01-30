@@ -1,16 +1,35 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { usePrivy } from "@privy-io/react-auth";
 
 import { CryptoWallet } from "@/components/icons/crypto-wallet";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const router = useRouter();
+  const { authenticated, ready } = usePrivy();
 
   const handleGetStarted = () => {
     router.push("/auth");
   };
+
+  useEffect(() => {
+    if (ready && authenticated) {
+      router.push("/dashboard");
+    }
+  }, [ready, authenticated, router]);
+
+  if (!ready) {
+    return null;
+  }
+
+  if (authenticated) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">
