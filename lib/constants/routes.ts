@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: "/auth/login",
   VERIFY: "/auth/verify",
   ONBOARDING: "/auth/onboarding",
+  RECOVER: "/auth/recover",
   DASHBOARD: "/app/dashboard",
   SETTINGS: "/app/settings",
   NOTIFICATIONS: "/app/notifications",

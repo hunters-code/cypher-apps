@@ -12,6 +12,7 @@ import { ActionsButton } from "@/components/wallet/ActionsButton";
 import { AssetList, type Asset } from "@/components/wallet/AssetList";
 import { BalanceDisplay } from "@/components/wallet/BalanceDisplay";
 import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { useWallet } from "@/hooks/useWallet";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatCryptoAmount } from "@/lib/utils/format";
 import { hasSession } from "@/lib/utils/session";
@@ -21,13 +22,25 @@ const CDT_TOKEN_SYMBOLS = ["CDT"];
 export default function DashboardPage() {
   const router = useRouter();
   const { authenticated, ready } = usePrivy();
+  const { address, walletAddress } = useWallet();
   const { balances, isLoading } = useTokenBalances(CDT_TOKEN_SYMBOLS);
 
   useEffect(() => {
     if (ready && (!authenticated || !hasSession())) {
       router.push(ROUTES.LOGIN);
+      return;
     }
-  }, [ready, authenticated, router]);
+
+    if (ready && authenticated && hasSession()) {
+      const walletAddr = address || walletAddress;
+      if (walletAddr) {
+        const keysData = localStorage.getItem("cypher_keys");
+        if (!keysData) {
+          router.push(ROUTES.RECOVER);
+        }
+      }
+    }
+  }, [ready, authenticated, address, walletAddress, router]);
 
   const assets: Asset[] = useMemo(() => {
     return balances

@@ -230,6 +230,13 @@ export function useOnboarding() {
         );
         if (registeredUsername && registeredUsername.length > 0) {
           saveSession(user.wallet.address, `@${registeredUsername}`);
+
+          const keysData = localStorage.getItem("cypher_keys");
+          if (!keysData) {
+            router.push(ROUTES.RECOVER);
+            return;
+          }
+
           router.push(ROUTES.DASHBOARD);
           return;
         }

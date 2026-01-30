@@ -81,6 +81,12 @@ export function useVerify() {
         saveSession(walletAddress, `@${registeredUsername}`);
       }
 
+      const keysData = localStorage.getItem("cypher_keys");
+      if (!keysData) {
+        router.push(ROUTES.RECOVER);
+        return;
+      }
+
       router.push(ROUTES.DASHBOARD);
     },
     [ready, handleCreateWallet, handleCheckUsername, router]
