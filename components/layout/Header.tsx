@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Settings, Bell } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/constants/routes";
 
 interface HeaderProps {
   username: string;
@@ -15,11 +16,11 @@ export function Header({ username, hasNotifications = false }: HeaderProps) {
   const router = useRouter();
 
   const handleSettings = () => {
-    router.push("/settings");
+    router.push(ROUTES.SETTINGS);
   };
 
   const handleNotifications = () => {
-    router.push("/notifications");
+    router.push(ROUTES.NOTIFICATIONS);
   };
 
   return (

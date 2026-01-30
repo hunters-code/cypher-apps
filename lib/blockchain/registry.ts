@@ -53,6 +53,7 @@ export async function getViewingKey(
 
 /**
  * Get username for an address
+ * Returns empty string if user is not registered
  */
 export async function getUsername(
   provider: ethers.Provider,
@@ -68,7 +69,20 @@ export async function getUsername(
     const username = await registry.getUsername(address);
     return username;
   } catch (error) {
-    console.error("Error getting username:", error);
+    if (error instanceof Error) {
+      const errorMessage = error.message.toLowerCase();
+      const errorString = String(error).toLowerCase();
+
+      const isUserNotRegistered =
+        errorMessage.includes("user not registered") ||
+        errorString.includes("user not registered") ||
+        (errorMessage.includes("reverted") &&
+          errorMessage.includes("user not registered"));
+
+      if (isUserNotRegistered) {
+        return "";
+      }
+    }
     throw error;
   }
 }

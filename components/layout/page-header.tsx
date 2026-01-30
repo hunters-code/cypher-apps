@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 
 import { BackButton } from "@/components/layout/back-button";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/constants/routes";
 
 interface PageHeaderProps {
   backHref?: string;
@@ -30,7 +31,7 @@ export function PageHeader({
     } else if (closeHref) {
       router.push(closeHref);
     } else {
-      router.push("/");
+      router.push(ROUTES.HOME);
     }
   };
 

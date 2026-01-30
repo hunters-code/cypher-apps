@@ -16,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ROUTES } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils";
 
 interface NavigationProps {
@@ -28,17 +29,17 @@ export function Navigation({ username, showSettings = true }: NavigationProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/send", label: "Send" },
-    { href: "/receive", label: "Receive" },
-    { href: "/history", label: "Transaction History" },
+    { href: ROUTES.DASHBOARD, label: "Dashboard" },
+    { href: ROUTES.SEND, label: "Send" },
+    { href: ROUTES.RECEIVE, label: "Receive" },
+    { href: ROUTES.HISTORY, label: "Transaction History" },
   ];
 
   const isActive = (href: string) => pathname === href;
 
   return (
     <nav className="flex items-center justify-between w-full py-4 px-4 border-b border-border">
-      <Link href="/dashboard" className="flex items-center gap-2">
+      <Link href={ROUTES.DASHBOARD} className="flex items-center gap-2">
         <Logo />
         <span className="text-xl font-bold text-foreground">Cypher</span>
       </Link>
@@ -50,7 +51,7 @@ export function Navigation({ username, showSettings = true }: NavigationProps) {
           </span>
         )}
         {showSettings && (
-          <Link href="/settings">
+          <Link href={ROUTES.SETTINGS}>
             <Button variant="ghost" size="sm" className="hidden sm:flex">
               ⚙️
             </Button>
@@ -89,11 +90,11 @@ export function Navigation({ username, showSettings = true }: NavigationProps) {
               ))}
               {showSettings && (
                 <Link
-                  href="/settings"
+                  href={ROUTES.SETTINGS}
                   onClick={() => setIsOpen(false)}
                   className={cn(
                     "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                    isActive("/settings")
+                    isActive(ROUTES.SETTINGS)
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
                   )}

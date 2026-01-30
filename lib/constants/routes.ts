@@ -1,0 +1,16 @@
+export const ROUTES = {
+  HOME: "/",
+  LOGIN: "/auth/login",
+  VERIFY: "/auth/verify",
+  ONBOARDING: "/auth/onboarding",
+  DASHBOARD: "/app/dashboard",
+  SETTINGS: "/app/settings",
+  NOTIFICATIONS: "/app/notifications",
+  SEND: "/app/send",
+  SEND_CONFIRM: "/app/send/confirm",
+  SEND_SUCCESS: "/app/send/success",
+  RECEIVE: "/app/receive",
+  SCAN: "/app/scan",
+  HISTORY: "/app/history",
+  TRANSACTION: (id: string) => `/app/transaction/${id}`,
+} as const;

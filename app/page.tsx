@@ -8,18 +8,19 @@ import { usePrivy } from "@privy-io/react-auth";
 
 import { CryptoWallet } from "@/components/icons/crypto-wallet";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/constants/routes";
 
 export default function Home() {
   const router = useRouter();
   const { authenticated, ready } = usePrivy();
 
   const handleGetStarted = () => {
-    router.push("/auth");
+    router.push(ROUTES.LOGIN);
   };
 
   useEffect(() => {
     if (ready && authenticated) {
-      router.push("/dashboard");
+      router.push(ROUTES.DASHBOARD);
     }
   }, [ready, authenticated, router]);
 

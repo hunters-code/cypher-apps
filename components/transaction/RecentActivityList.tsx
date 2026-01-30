@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/constants/routes";
 
 import { RecentActivityItem } from "./RecentActivityItem";
 
@@ -32,7 +33,7 @@ export function RecentActivityList({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Recent Activity</h2>
         {showViewAll && (
-          <Link href="/history">
+          <Link href={ROUTES.HISTORY}>
             <Button variant="ghost" size="sm">
               View All →
             </Button>
