@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { usePrivy, useLoginWithEmail } from "@privy-io/react-auth";
+import {
+  usePrivy,
+  useLoginWithEmail,
+  useCreateWallet,
+} from "@privy-io/react-auth";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +19,7 @@ import {
 } from "@/components/ui/input-otp";
 import { useAuth } from "@/hooks/useAuth";
 import { useBaseProvider } from "@/hooks/useBlockchain";
-// import { getUsername } from "@/lib/blockchain";
+import { getUsername } from "@/lib/blockchain";
 import { saveSession, hasSession } from "@/lib/utils/session";
 
 export default function OTPPage() {
@@ -25,8 +29,9 @@ export default function OTPPage() {
   const [error, setError] = useState("");
 
   const { loginMethod, contactValue } = useAuth();
-  const { user } = usePrivy();
+  const { user, ready } = usePrivy();
   const provider = useBaseProvider();
+  const { createWallet } = useCreateWallet();
 
   const {
     loginWithCode,
@@ -36,20 +41,28 @@ export default function OTPPage() {
     onComplete: async (params) => {
       let hasUsername = false;
       let registeredUsername = "";
+      let walletAddress = user?.wallet?.address;
 
-      if (provider && user?.wallet?.address) {
+      if (!walletAddress && ready) {
         try {
-          /*
-            should be getting username using stealth address
-            for now, assume if username is already registered, it will exist in localStorage
-          */
+          const newWallet = await createWallet();
+          walletAddress = newWallet.address;
+        } catch (error) {
+          console.error("Error creating wallet:", error);
+          setError("Failed to create wallet. Please try again.");
+          return;
+        }
+      }
 
-          // const username = await getUsername(provider, user.wallet.address);
-          const username = localStorage.getItem("cypher_username") || "";
+      if (provider && walletAddress) {
+        try {
+          const username = await getUsername(provider, walletAddress);
 
           if (username && username.length > 0) {
             hasUsername = true;
             registeredUsername = username;
+
+            localStorage.setItem("cypher_username", `@${username}`);
           }
         } catch {
           hasUsername = false;
@@ -59,8 +72,8 @@ export default function OTPPage() {
       if (params.isNewUser || !hasUsername) {
         router.push("/onboarding");
       } else {
-        if (user?.wallet?.address && registeredUsername) {
-          saveSession(user.wallet.address, `@${registeredUsername}`);
+        if (walletAddress && registeredUsername) {
+          saveSession(walletAddress, `@${registeredUsername}`);
         }
         router.push("/dashboard");
       }
