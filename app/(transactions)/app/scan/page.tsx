@@ -135,10 +135,10 @@ export default function ScanPage() {
 
         {scannedData && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-            <div className="p-6 bg-background rounded-xl border border-border max-w-sm mx-4">
+            <div className="mx-4 w-full max-w-md rounded-xl border border-border bg-background p-6">
               <div className="flex flex-col items-center gap-4">
-                <div className="p-4 rounded-full bg-green-600/10">
-                  <QrCode className="h-12 w-12 text-green-600" />
+                <div className="rounded-full bg-primary/10 p-4">
+                  <QrCode className="h-12 w-12 text-primary" />
                 </div>
                 <div className="text-center space-y-2">
                   <p className="text-sm font-medium text-foreground">
@@ -149,6 +149,7 @@ export default function ScanPage() {
                   </p>
                 </div>
                 <Button
+                  size="lg"
                   className="w-full"
                   onClick={() => handleScanned(scannedData)}
                 >
@@ -168,7 +169,7 @@ export default function ScanPage() {
             Show my QR
           </Button>
         </Link>
-        <Button variant="secondary" className="w-full" onClick={handleBack}>
+        <Button variant="outline" className="w-full" onClick={handleBack}>
           Back
         </Button>
       </div>

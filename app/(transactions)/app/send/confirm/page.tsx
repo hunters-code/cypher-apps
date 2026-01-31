@@ -150,7 +150,7 @@ function SendConfirmContent() {
   };
 
   return (
-    <div className="flex flex-col justify-between items-center gap-4 h-full w-full py-16 px-8">
+    <div className="mx-auto flex h-full w-full max-w-4xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
       <div className="flex flex-col items-center gap-8 text-center w-full">
         <h1 className="text-3xl font-bold text-foreground text-left w-full">
           Confirm Transaction
@@ -216,8 +216,13 @@ function SendConfirmContent() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
-        <Button className="w-full" onClick={handleConfirm} disabled={isLoading}>
+      <div className="flex flex-col gap-3 w-full">
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={handleConfirm}
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -231,7 +236,7 @@ function SendConfirmContent() {
           )}
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
           className="w-full"
           onClick={handleBack}
           disabled={isLoading}
@@ -247,7 +252,7 @@ export default function SendConfirmPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col justify-center items-center gap-4 h-full w-full py-16 px-8">
+        <div className="mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center gap-4 px-4 py-8">
           <div className="text-muted-foreground">Loading...</div>
         </div>
       }

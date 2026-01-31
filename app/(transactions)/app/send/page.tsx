@@ -154,15 +154,16 @@ export default function SendPage() {
   }
 
   return (
-    <div className="flex flex-col justify-between items-center gap-4 h-full w-full py-16 px-8">
-      <div className="flex flex-col items-center gap-8 text-center w-full">
-        <h1 className="text-3xl font-bold text-foreground text-left w-full">
-          Send Crypto
-        </h1>
-        <p className="text-base text-muted-foreground text-left w-full">
-          Send crypto privately to any username or address. Your transaction
-          stays hidden.
-        </p>
+    <div className="mx-auto flex w-full max-w-4xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
+      <div className="flex flex-col gap-6 w-full">
+        <div>
+          <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
+            Send
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground md:text-base">
+            Send crypto privately to any username or address.
+          </p>
+        </div>
 
         <div className="space-y-6 w-full">
           <div className="space-y-2">
@@ -200,8 +201,8 @@ export default function SendPage() {
                     </>
                   ) : recipientValid === true ? (
                     <>
-                      <Check className="h-3 w-3 text-green-600" />
-                      <span className="text-green-600">Valid</span>
+                      <Check className="h-3 w-3 text-primary" />
+                      <span className="text-primary">Valid</span>
                     </>
                   ) : recipientValid === false ? (
                     <>
@@ -297,7 +298,7 @@ export default function SendPage() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center justify-between rounded-xl border border-border p-4">
               <div className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
                 <div className="flex flex-col">
@@ -322,7 +323,7 @@ export default function SendPage() {
             </div>
           </div>
 
-          <div className="p-4 bg-muted/50 rounded-lg">
+          <div className="rounded-xl bg-muted/50 p-4">
             <p className="text-xs text-muted-foreground">
               Estimated Fee:{" "}
               {token === "CDT"
@@ -333,8 +334,9 @@ export default function SendPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-3 w-full">
         <Button
+          size="lg"
           className="w-full"
           disabled={
             !recipient.trim() ||
@@ -349,7 +351,7 @@ export default function SendPage() {
         >
           Continue
         </Button>
-        <Button variant="secondary" className="w-full" onClick={handleBack}>
+        <Button variant="outline" className="w-full" onClick={handleBack}>
           Back
         </Button>
       </div>

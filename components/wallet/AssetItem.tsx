@@ -29,7 +29,7 @@ export function AssetItem({
 
   return (
     <div
-      className="border rounded-lg p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+      className="rounded-xl border border-border bg-card p-4 cursor-pointer transition-colors hover:bg-muted/50"
       onClick={onClick}
     >
       <div className="flex items-center justify-between">

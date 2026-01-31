@@ -59,7 +59,7 @@ export default function LandingNavbar() {
 
             <Link
               href={ROUTES.LOGIN}
-              className="hidden rounded-full bg-brand px-6 py-2.5 text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] md:inline-block"
+              className="hidden rounded-xl bg-brand px-6 py-2.5 text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] hover:opacity-95 md:inline-block"
             >
               Get Started
             </Link>
@@ -98,7 +98,7 @@ export default function LandingNavbar() {
           ))}
           <Link
             href={ROUTES.LOGIN}
-            className="w-max rounded-full bg-brand px-6 py-2.5 text-sm text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)]"
+            className="w-max rounded-xl bg-brand px-6 py-2.5 text-sm text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] hover:opacity-95"
             onClick={() => setIsMenuOpen(false)}
           >
             Get Started

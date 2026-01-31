@@ -24,12 +24,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">
-      <div className="flex flex-col items-center gap-8 text-center w-full">
-        <h1 className="text-3xl font-bold text-foreground text-left">
-          Your private crypto wallet awaits
-        </h1>
-
+    <div className="mx-auto flex w-full max-w-4xl flex-col justify-between gap-6 px-4 py-8 md:py-12">
+      <div className="flex flex-col gap-6 w-full">
+        <div>
+          <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
+            Your private crypto wallet awaits
+          </h1>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-6 w-full">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground">
@@ -63,9 +64,10 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-3 w-full shrink-0">
         <Button
           type="button"
+          size="lg"
           onClick={handleSubmit}
           className="w-full"
           disabled={isLoading || !emailOrPhone.trim()}

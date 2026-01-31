@@ -25,12 +25,12 @@ export function RecentActivityItem({
   const prefix = isSend ? "-" : "+";
   const Icon = isSend ? ArrowUp : ArrowDown;
   const formattedAmount = formatCryptoAmount(amount);
-  const iconColor = isSend ? "text-destructive" : "text-green-600";
-  const iconBg = isSend ? "bg-destructive/10" : "bg-green-600/10";
+  const iconColor = isSend ? "text-destructive" : "text-primary";
+  const iconBg = isSend ? "bg-destructive/10" : "bg-primary/10";
 
   return (
     <div
-      className="border rounded-lg p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+      className="rounded-xl border border-border bg-card p-4 cursor-pointer transition-colors hover:bg-muted/50"
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
@@ -50,7 +50,7 @@ export function RecentActivityItem({
         </div>
         <div className="flex flex-col items-end gap-0.5">
           <span
-            className={`text-sm font-medium ${isSend ? "text-destructive" : "text-green-600"}`}
+            className={`text-sm font-medium ${isSend ? "text-destructive" : "text-primary"}`}
           >
             {prefix}
             {formattedAmount} {token}

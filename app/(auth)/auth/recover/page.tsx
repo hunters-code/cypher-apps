@@ -20,7 +20,7 @@ export default function RecoverPage() {
   }
 
   return (
-    <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">
+    <div className="mx-auto flex h-full w-full max-w-4xl flex-col justify-between gap-6 px-4 py-8 md:py-12">
       <div className="flex flex-col items-center gap-8 text-center w-full">
         <h1 className="text-3xl font-bold text-foreground text-left">
           Enter Your PIN
@@ -46,10 +46,10 @@ export default function RecoverPage() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-3 w-full">
         <Button
           type="button"
-          variant="secondary"
+          variant="outline"
           className="w-full"
           onClick={handleBack}
           disabled={isLoading}

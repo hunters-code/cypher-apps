@@ -24,7 +24,7 @@ export default function VerifyPage() {
   } = useVerify();
 
   return (
-    <div className="flex flex-col justify-between items-center gap-4 text-center h-full w-full py-32 px-8">
+    <div className="mx-auto flex h-full w-full max-w-4xl flex-col justify-between gap-6 px-4 py-8 md:py-12">
       <div className="flex flex-col items-center gap-4 w-full">
         <h1 className="text-3xl font-bold text-foreground text-left">
           Enter confirmation code
@@ -67,9 +67,10 @@ export default function VerifyPage() {
         </form>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-3 w-full">
         <Button
           type="submit"
+          size="lg"
           onClick={handleSubmit}
           className="w-full"
           disabled={state.status === "submitting-code" || otp.trim().length < 6}

@@ -25,7 +25,7 @@ export default function FeaturesSection() {
               </p>
               <Link
                 href={ROUTES.LOGIN}
-                className="mt-6 flex w-max items-center gap-1 rounded-full bg-brand-foreground px-5 py-2 text-brand hover:bg-brand-foreground/90"
+                className="mt-6 flex w-max items-center gap-1 rounded-xl bg-brand-foreground px-5 py-2.5 text-brand font-medium shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] hover:opacity-95"
               >
                 Get started
                 <ArrowUpRightIcon size={20} />

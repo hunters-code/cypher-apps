@@ -202,7 +202,7 @@ export default function HeroSection() {
             <button
               type="submit"
               disabled={isButtonDisabled}
-              className="h-12 w-full rounded-xl bg-brand font-semibold text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-12 w-full rounded-xl bg-brand font-semibold text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Claim My Username
             </button>
