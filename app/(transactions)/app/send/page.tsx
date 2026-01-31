@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
 import { QrCode, Lock, Loader2, Check, X } from "lucide-react";
@@ -13,28 +13,33 @@ import { Label } from "@/components/ui/label";
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useTokenBalances } from "@/hooks/useTokenBalances";
 import { useUsername } from "@/hooks/useUsername";
-// import { getAddress } from "@/lib/blockchain";
 import { ROUTES } from "@/lib/constants/routes";
+import { formatCryptoAmount } from "@/lib/utils/format";
 import { hasSession } from "@/lib/utils/session";
 
 export default function SendPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { authenticated, ready } = usePrivy();
   const provider = useBaseProvider();
   const { checkAvailability, isChecking } = useUsername();
-  const { balances, isLoading: isLoadingBalances } = useTokenBalances();
-  const [recipient, setRecipient] = useState("");
+  const initialRecipient = searchParams.get("recipient") || "";
+  const initialToken = searchParams.get("token") || "ETH";
+
+  const [recipient, setRecipient] = useState(initialRecipient);
   const [amount, setAmount] = useState("");
   const [isPrivate, setIsPrivate] = useState(true);
-  const [token] = useState("CDT");
+  const [token, setToken] = useState<"ETH" | "CDT">(
+    (initialToken as "ETH" | "CDT") || "ETH"
+  );
   const [isValidatingRecipient, setIsValidatingRecipient] = useState(false);
   const [recipientValid, setRecipientValid] = useState<boolean | null>(null);
   const [recipientError, setRecipientError] = useState("");
   const [balanceError, setBalanceError] = useState("");
 
-  // Get CDT balance
-  const cdtBalance = balances.find((b) => b.symbol === "CDT");
-  const currentBalance = cdtBalance ? parseFloat(cdtBalance.amount) : 0;
+  const { balances, isLoading: balancesLoading } = useTokenBalances();
+  const tokenBalance = balances.find((b) => b.symbol === token);
+  const balanceAmount = tokenBalance ? parseFloat(tokenBalance.amount) : 0;
 
   // Validate recipient (username or address)
   useEffect(() => {
@@ -100,13 +105,13 @@ export default function SendPage() {
       return;
     }
 
-    if (amountValue > currentBalance) {
+    if (amountValue > balanceAmount) {
       setBalanceError("Insufficient balance");
       return;
     }
 
     setBalanceError("");
-  }, [amount, currentBalance]);
+  }, [amount, balanceAmount]);
 
   const handleContinue = () => {
     if (!recipient.trim() || !amount.trim()) {
@@ -121,7 +126,9 @@ export default function SendPage() {
       return;
     }
 
-    const usdValue = (parseFloat(amount) * 1790).toFixed(2);
+    const tokenPrice = token === "CDT" ? 0.1 : 1790;
+    const usdValue = (parseFloat(amount) * tokenPrice).toFixed(2);
+
     const params = new URLSearchParams({
       recipient: recipient.startsWith("@")
         ? recipient
@@ -132,8 +139,8 @@ export default function SendPage() {
       token,
       private: isPrivate.toString(),
       usdValue,
-      fee: "0.0002",
-      feeUSD: "0.36",
+      fee: token === "CDT" ? "0" : "0.0002", // CDT transfers might have different fee
+      feeUSD: token === "CDT" ? "0" : "0.36",
     });
 
     router.push(`${ROUTES.SEND_CONFIRM}?${params.toString()}`);
@@ -230,14 +237,36 @@ export default function SendPage() {
                 className="flex-1"
                 min={0}
               />
-              <Button variant="outline">CDT</Button>
+              <div className="flex gap-1">
+                <Button
+                  variant={token === "ETH" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setToken("ETH")}
+                >
+                  ETH
+                </Button>
+                <Button
+                  variant={token === "CDT" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setToken("CDT")}
+                >
+                  CDT
+                </Button>
+              </div>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>≈ $2,685.00 USD</span>
               <span>
-                {isLoadingBalances
-                  ? "Loading balance..."
-                  : `Balance: ${currentBalance.toFixed(4)} CDT`}
+                {amount
+                  ? `≈ $${(parseFloat(amount) * (token === "CDT" ? 0.1 : 1790)).toFixed(2)} USD`
+                  : "≈ $0.00 USD"}
+              </span>
+              <span>
+                Balance:{" "}
+                {balancesLoading
+                  ? "Loading..."
+                  : tokenBalance
+                    ? `${formatCryptoAmount(tokenBalance.amount, 4)} ${token}`
+                    : `0 ${token}`}
               </span>
             </div>
             {balanceError && (
@@ -251,24 +280,24 @@ export default function SendPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setAmount((currentBalance * 0.25).toFixed(4))}
-              disabled={isLoadingBalances || currentBalance === 0}
+              onClick={() => setAmount((balanceAmount * 0.25).toFixed(4))}
+              disabled={balancesLoading || balanceAmount === 0}
             >
               25%
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setAmount((currentBalance * 0.5).toFixed(4))}
-              disabled={isLoadingBalances || currentBalance === 0}
+              onClick={() => setAmount((balanceAmount * 0.5).toFixed(4))}
+              disabled={balancesLoading || balanceAmount === 0}
             >
               50%
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setAmount(currentBalance.toFixed(4))}
-              disabled={isLoadingBalances || currentBalance === 0}
+              onClick={() => setAmount(balanceAmount.toFixed(4))}
+              disabled={balancesLoading || balanceAmount === 0}
             >
               Max
             </Button>
@@ -302,7 +331,10 @@ export default function SendPage() {
 
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-xs text-muted-foreground">
-              Estimated Fee: ~0.0002 CDT ($0.36)
+              Estimated Fee:{" "}
+              {token === "CDT"
+                ? "~0.0001 ETH (gas fee)"
+                : "~0.0002 ETH ($0.36)"}
             </p>
           </div>
         </div>
@@ -318,7 +350,7 @@ export default function SendPage() {
             isValidatingRecipient ||
             isChecking ||
             !!balanceError ||
-            isLoadingBalances
+            balancesLoading
           }
           onClick={handleContinue}
         >

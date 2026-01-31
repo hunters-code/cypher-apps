@@ -29,7 +29,12 @@ export function useOnboarding() {
   } = useWallet();
   const provider = useBaseProvider();
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const claimed = sessionStorage.getItem("cypher_claim_username") ?? "";
+    if (claimed) sessionStorage.removeItem("cypher_claim_username");
+    return claimed;
+  });
   const [step, setStep] = useState<OnboardingStep>("username");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
