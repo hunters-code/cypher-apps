@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { Info, Maximize2, Send, X, Link2 } from "lucide-react";
 
 import type { Asset } from "@/components/wallet/AssetList";
 import { ROUTES } from "@/lib/constants/routes";
+import { TOKEN_ICONS } from "@/lib/constants/tokens";
 import { getAssetIcon } from "@/lib/utils/assetIcons";
 import { formatCurrency, formatUSDValue } from "@/lib/utils/format";
 
@@ -64,6 +66,7 @@ export function StealthBalancesCard({
         <p className="mt-4 text-sm text-muted-foreground">Tokens</p>
         <div className="mt-2 space-y-2">
           {assets.map((asset) => {
+            const iconSrc = asset.logoURI ?? TOKEN_ICONS[asset.symbol];
             const {
               icon: Icon,
               color,
@@ -80,9 +83,17 @@ export function StealthBalancesCard({
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full ${bgColor}`}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full ${iconSrc ? "bg-muted/20" : bgColor}`}
                   >
-                    {isCustomIcon ? (
+                    {iconSrc ? (
+                      <Image
+                        src={iconSrc}
+                        alt={asset.symbol}
+                        width={36}
+                        height={36}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : isCustomIcon ? (
                       <Icon className="h-5 w-5" />
                     ) : (
                       <Icon className={`h-5 w-5 ${color}`} />

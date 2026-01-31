@@ -59,6 +59,12 @@ const assetIconsMap: Record<string, AssetIconConfig> = {
     bgColor: "bg-yellow-500/10",
     isCustomIcon: false,
   },
+  CDT: {
+    icon: DollarSign,
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    isCustomIcon: false,
+  },
 };
 
 export function getAssetIcon(
