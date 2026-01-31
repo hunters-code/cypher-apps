@@ -4,18 +4,6 @@ import { ethers } from "ethers";
 
 import { BASE_CHAIN_ID } from "@/lib/constants";
 
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: {
-        method: string;
-        params?: unknown[];
-      }) => Promise<unknown>;
-      isMetaMask?: boolean;
-    };
-  }
-}
-
 export function useBaseProvider(): ethers.JsonRpcProvider | null {
   return useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -36,7 +24,10 @@ export function useBrowserProvider(): ethers.BrowserProvider | null {
     if (typeof window === "undefined" || !window.ethereum) return null;
 
     try {
-      return new ethers.BrowserProvider(window.ethereum, BASE_CHAIN_ID);
+      return new ethers.BrowserProvider(
+        window.ethereum as ethers.Eip1193Provider,
+        BASE_CHAIN_ID
+      );
     } catch {
       return null;
     }
@@ -49,7 +40,7 @@ export async function getSigner(): Promise<ethers.JsonRpcSigner | null> {
   if (window.ethereum) {
     try {
       const provider = new ethers.BrowserProvider(
-        window.ethereum,
+        window.ethereum as ethers.Eip1193Provider,
         BASE_CHAIN_ID
       );
       const signer = await provider.getSigner();
