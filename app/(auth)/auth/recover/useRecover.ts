@@ -106,10 +106,6 @@ export function useRecover() {
             err.message.includes("network changed") ||
             err.message.includes("NETWORK_ERROR")
           ) {
-            console.warn(
-              "Network change detected, but continuing recovery:",
-              err.message
-            );
             setError("Network changed. Please try again.");
           } else {
             setError(err.message || "Something went wrong. Please try again.");
@@ -121,7 +117,7 @@ export function useRecover() {
         setIsLoading(false);
       }
     },
-    [signer, address, walletAddress, router]
+    [signer, address, walletAddress, router, baseProvider]
   );
 
   const handleBack = useCallback(() => {

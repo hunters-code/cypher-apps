@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useTokenBalances } from "@/hooks/useTokenBalances";
 import { useUsername } from "@/hooks/useUsername";
-// import { getAddress } from "@/lib/blockchain";
 import { ROUTES } from "@/lib/constants/routes";
 import { hasSession } from "@/lib/utils/session";
 
@@ -32,11 +31,9 @@ export default function SendPage() {
   const [recipientError, setRecipientError] = useState("");
   const [balanceError, setBalanceError] = useState("");
 
-  // Get CDT balance
   const cdtBalance = balances.find((b) => b.symbol === "CDT");
   const currentBalance = cdtBalance ? parseFloat(cdtBalance.amount) : 0;
 
-  // Validate recipient (username or address)
   useEffect(() => {
     if (!recipient.trim() || !provider) {
       setRecipientValid(null);
@@ -51,27 +48,21 @@ export default function SendPage() {
       try {
         const cleanRecipient = recipient.replace(/^@+/, "");
 
-        // Check if it's a valid Ethereum address
         if (recipient.startsWith("0x") && recipient.length === 42) {
           setRecipientValid(true);
           setIsValidatingRecipient(false);
           return;
         }
 
-        // Check if username is available (meaning it does NOT exist)
-        // For sending, we want the username to be TAKEN (not available)
         const isAvailable = await checkAvailability(cleanRecipient);
 
         if (isAvailable === false) {
-          // Username is taken (registered), which is what we want for sending
           setRecipientValid(true);
           setRecipientError("");
         } else if (isAvailable === true) {
-          // Username is available (not registered), cannot send to it
           setRecipientValid(false);
           setRecipientError("Username not found");
         } else {
-          // Error or null result
           setRecipientValid(false);
           setRecipientError("Could not verify username");
         }
@@ -87,7 +78,6 @@ export default function SendPage() {
     return () => clearTimeout(timeoutId);
   }, [recipient, provider, checkAvailability]);
 
-  // Validate amount against balance
   useEffect(() => {
     if (!amount.trim()) {
       setBalanceError("");

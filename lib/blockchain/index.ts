@@ -1,9 +1,3 @@
-/**
- * Blockchain Integration Module
- * Exports all blockchain-related functions and constants
- */
-
-// Constants
 export {
   REGISTRY_ADDRESS,
   ANNOUNCEMENT_ADDRESS,
@@ -12,7 +6,6 @@ export {
   ANNOUNCEMENT_ABI,
 } from "@/lib/constants";
 
-// Stealth Address Functions
 export {
   generateStealthKeys,
   generateStealthAddress,
@@ -22,7 +15,6 @@ export {
   type StealthAddressResult,
 } from "./stealth";
 
-// Registry Functions
 export {
   checkUsernameAvailability,
   getViewingKey,
@@ -32,7 +24,6 @@ export {
   listenForRegistrations,
 } from "./registry";
 
-// Scanner Functions
 export {
   scanForIncomingTransfers,
   parseMetadata,
@@ -42,14 +33,11 @@ export {
   type ParsedMetadata,
 } from "./scanner";
 
-// Announcement Functions
 export {
   announceStealthTransaction,
   listenForAnnouncements,
 } from "./announcement";
 
-// Meta Keys (Deterministic Key Derivation)
 export { deriveMetaKeys, type MetaKeys } from "./meta-keys";
 
-// Recovery Functions
 export { recoverMetaKeys } from "./recovery";

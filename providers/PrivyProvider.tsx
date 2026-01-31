@@ -19,7 +19,6 @@ export default function PrivyProvider({
             createOnLogin: "users-without-wallets",
           },
         },
-        // appearance: { walletChainType: "ethereum-and-solana" },
       }}
     >
       {children}

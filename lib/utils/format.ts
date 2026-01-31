@@ -107,8 +107,7 @@ export function formatCryptoAmount(
     });
 
     return `${formattedInteger}.${decimalPart}`;
-  } catch (error) {
-    console.error("Error formatting crypto amount:", error);
+  } catch {
     return "0.00";
   }
 }

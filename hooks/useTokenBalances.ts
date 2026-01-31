@@ -52,15 +52,11 @@ export function useTokenBalances(): {
     try {
       const viewingKeyPrivate = getViewingKeyPrivate();
 
-      const lastScannedBlock = localStorage.getItem("lastScannedBlock");
-      const fromBlock = lastScannedBlock ? Number(lastScannedBlock) : 0;
-
       const balanceMap = await getMultipleTokenBalancesWithStealth(
         provider,
         AVAILABLE_TOKENS,
         address,
-        viewingKeyPrivate,
-        fromBlock
+        viewingKeyPrivate
       );
 
       const balanceList: TokenBalance[] = AVAILABLE_TOKENS.map((token) => ({
@@ -75,7 +71,6 @@ export function useTokenBalances(): {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch balances";
       setError(errorMessage);
-      console.error("Error fetching token balances:", err);
     } finally {
       setIsLoading(false);
     }

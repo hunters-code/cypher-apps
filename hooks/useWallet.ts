@@ -1,7 +1,3 @@
-/**
- * Hook for Privy wallet integration with ethers.js
- */
-
 import { useEffect, useState } from "react";
 
 import { usePrivy, useWallets } from "@privy-io/react-auth";
@@ -55,7 +51,6 @@ export function useWallet() {
         const walletProvider = await wallet.getEthereumProvider();
 
         if (!walletProvider) {
-          console.error("No Ethereum provider found");
           setIsLoading(false);
           return;
         }
@@ -74,8 +69,7 @@ export function useWallet() {
         if (signerAddress !== walletAddress) {
           setAddress(signerAddress);
         }
-      } catch (error) {
-        console.error("Error setting up wallet:", error);
+      } catch {
       } finally {
         setIsLoading(false);
       }
