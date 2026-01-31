@@ -112,10 +112,6 @@ export default function HistoryPage() {
     };
   }, [hasMore, filteredTransactions.length]);
 
-  const handleBack = () => {
-    router.push(ROUTES.DASHBOARD);
-  };
-
   const handleTransactionClick = (transaction: Transaction) => {
     router.push(ROUTES.TRANSACTION(transaction.id));
   };
@@ -264,14 +260,6 @@ export default function HistoryPage() {
               )}
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-5xl shrink-0 border-t border-border bg-background px-4 py-4">
-        <div className="flex flex-col gap-3">
-          <Button variant="outline" className="w-full" onClick={handleBack}>
-            Back
-          </Button>
         </div>
       </div>
     </div>

@@ -120,18 +120,10 @@ export default function ScanPage() {
     }
   };
 
-  const handleBack = () => {
-    if (scannerRef.current && isScannerRunningRef.current) {
-      isScannerRunningRef.current = false;
-      scannerRef.current.stop().catch(() => {});
-    }
-    router.push(ROUTES.DASHBOARD);
-  };
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-black">
-      <div className="flex-1 relative overflow-hidden min-h-0">
-        <div id="reader" className="w-full h-full" />
+      <div className="relative min-h-[60vh] flex-1 overflow-hidden">
+        <div id="reader" className="absolute inset-0 w-full min-h-[300px]" />
 
         {scannedData && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80">
@@ -162,16 +154,13 @@ export default function ScanPage() {
         )}
       </div>
 
-      <div className="flex flex-col gap-3 w-full px-4 py-4 bg-background border-t border-border shrink-0">
+      <div className="flex flex-col gap-3 w-full shrink-0 border-t border-border bg-background px-4 py-4">
         <Link href={ROUTES.RECEIVE} className="w-full">
           <Button variant="outline" className="w-full">
             <QrCode className="mr-2 h-4 w-4" />
             Show my QR
           </Button>
         </Link>
-        <Button variant="outline" className="w-full" onClick={handleBack}>
-          Back
-        </Button>
       </div>
     </div>
   );

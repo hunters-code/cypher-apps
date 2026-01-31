@@ -33,10 +33,6 @@ function SendSuccessContent() {
     router.push(ROUTES.HISTORY);
   };
 
-  const handleBackToDashboard = () => {
-    router.push(ROUTES.DASHBOARD);
-  };
-
   return (
     <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
       <div className="flex flex-col items-center gap-8 text-center w-full">
@@ -146,13 +142,6 @@ function SendSuccessContent() {
         <Button size="lg" className="w-full" onClick={handleViewTransaction}>
           View Transaction
           <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleBackToDashboard}
-        >
-          Back to Dashboard
         </Button>
       </div>
 

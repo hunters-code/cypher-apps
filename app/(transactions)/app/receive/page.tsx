@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
 import { motion } from "framer-motion";
-import { Copy, Check, Share2, Lock, ArrowLeft } from "lucide-react";
+import { Copy, Check, Share2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
@@ -52,10 +52,6 @@ export default function ReceivePage() {
     } else {
       handleCopyId();
     }
-  };
-
-  const handleBack = () => {
-    router.push(ROUTES.DASHBOARD);
   };
 
   useEffect(() => {
@@ -187,25 +183,6 @@ export default function ReceivePage() {
           )}
         </motion.div>
 
-        {/* Private info */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"
-        >
-          <Lock className="h-5 w-5 shrink-0 text-primary" />
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              Private by default
-            </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              When someone sends to your Cypher ID, funds use stealth addresses
-              and stay private on-chain.
-            </p>
-          </div>
-        </motion.div>
-
         {/* Actions */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -216,10 +193,6 @@ export default function ReceivePage() {
           <Button size="lg" className="w-full" onClick={handleShare}>
             <Share2 className="mr-2 h-5 w-5" />
             Share to receive
-          </Button>
-          <Button variant="outline" className="w-full" onClick={handleBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
           </Button>
         </motion.div>
       </div>

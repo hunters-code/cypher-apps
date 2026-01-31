@@ -51,10 +51,6 @@ export default function SettingsPage() {
   const username = "@nashirjamali";
   const walletAddress = "0x9a3d6c5f8e2b1a7c4d9e8f3b2a1c6d5e4f3a2b1c";
 
-  const handleBack = () => {
-    router.push(ROUTES.DASHBOARD);
-  };
-
   const handleCopyAddress = async () => {
     await navigator.clipboard.writeText(walletAddress);
     setCopiedAddress(true);
@@ -268,13 +264,6 @@ export default function SettingsPage() {
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={handleBack}
-              >
-                Back
               </Button>
             </div>
           </div>
