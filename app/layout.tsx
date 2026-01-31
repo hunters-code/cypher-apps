@@ -5,6 +5,7 @@ import { LandingLayoutWrapper } from "@/components/layout/landing-layout-wrapper
 import { MetaTags } from "@/components/meta-tags";
 import { MiniAppProvider } from "@/components/miniapp-provider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { BalanceProvider } from "@/providers/BalanceProvider";
 import PrivyProvider from "@/providers/PrivyProvider";
 
 import type { Metadata } from "next";
@@ -149,9 +150,11 @@ export default function RootLayout({
         <MetaTags />
         <PrivyProvider>
           <AuthProvider>
-            <MiniAppProvider>
-              <LandingLayoutWrapper>{children}</LandingLayoutWrapper>
-            </MiniAppProvider>
+            <BalanceProvider>
+              <MiniAppProvider>
+                <LandingLayoutWrapper>{children}</LandingLayoutWrapper>
+              </MiniAppProvider>
+            </BalanceProvider>
           </AuthProvider>
         </PrivyProvider>
       </body>

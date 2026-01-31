@@ -139,36 +139,41 @@ export async function getTokenBalanceWithStealth(
   mainAddress: string,
   stealthAddresses: string[]
 ): Promise<string> {
-  let totalBalance = BigInt(0);
+  try {
+    let totalBalance = BigInt(0);
 
-  const mainBalance = await getTokenBalance(provider, tokenInfo, mainAddress);
-  if (tokenInfo.address === "native") {
-    totalBalance += ethers.parseEther(mainBalance);
-  } else {
-    totalBalance += ethers.parseUnits(mainBalance, tokenInfo.decimals);
+    const mainBalance = await getTokenBalance(provider, tokenInfo, mainAddress);
+    if (tokenInfo.address === "native") {
+      totalBalance += ethers.parseEther(mainBalance);
+    } else {
+      totalBalance += ethers.parseUnits(mainBalance, tokenInfo.decimals);
+    }
+
+    await Promise.all(
+      stealthAddresses.map(async (stealthAddress) => {
+        try {
+          const balance = await getTokenBalance(
+            provider,
+            tokenInfo,
+            stealthAddress
+          );
+          if (tokenInfo.address === "native") {
+            totalBalance += ethers.parseEther(balance);
+          } else {
+            totalBalance += ethers.parseUnits(balance, tokenInfo.decimals);
+          }
+        } catch {}
+      })
+    );
+
+    if (tokenInfo.address === "native") {
+      return ethers.formatEther(totalBalance);
+    }
+    return ethers.formatUnits(totalBalance, tokenInfo.decimals);
+  } catch (error) {
+    console.error(`Error getting balance for ${tokenInfo.symbol}:`, error);
+    return "0";
   }
-
-  await Promise.all(
-    stealthAddresses.map(async (stealthAddress) => {
-      try {
-        const balance = await getTokenBalance(
-          provider,
-          tokenInfo,
-          stealthAddress
-        );
-        if (tokenInfo.address === "native") {
-          totalBalance += ethers.parseEther(balance);
-        } else {
-          totalBalance += ethers.parseUnits(balance, tokenInfo.decimals);
-        }
-      } catch {}
-    })
-  );
-
-  if (tokenInfo.address === "native") {
-    return ethers.formatEther(totalBalance);
-  }
-  return ethers.formatUnits(totalBalance, tokenInfo.decimals);
 }
 
 export async function getMultipleTokenBalancesWithStealth(

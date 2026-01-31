@@ -90,17 +90,36 @@ export function formatCryptoAmount(
       return "<0.0001";
     }
 
-    const dotIndex = formattedValue.indexOf(".");
-    const integerPart =
-      dotIndex === -1 ? formattedValue : formattedValue.substring(0, dotIndex);
-    let decimalPart =
-      dotIndex === -1 ? "" : formattedValue.substring(dotIndex + 1);
-
-    if (decimalPart.length > displayDecimals) {
-      decimalPart = decimalPart.substring(0, displayDecimals);
-    } else {
-      decimalPart = decimalPart.padEnd(displayDecimals, "0");
+    if (numFormatted >= 1_000_000_000) {
+      const billions = numFormatted / 1_000_000_000;
+      return `${billions.toFixed(2)}B`;
     }
+
+    if (numFormatted >= 1_000_000) {
+      const millions = numFormatted / 1_000_000;
+      return `${millions.toFixed(2)}M`;
+    }
+
+    if (numFormatted >= 1_000) {
+      const thousands = numFormatted / 1_000;
+      return `${thousands.toFixed(2)}K`;
+    }
+
+    // Use toFixed for proper rounding instead of string manipulation
+    const rounded = numFormatted.toFixed(displayDecimals);
+    const roundedNum = parseFloat(rounded);
+
+    // If rounded to 0 but original was > 0, show <0.01 or similar
+    if (roundedNum === 0 && numFormatted > 0) {
+      if (numFormatted < 0.01) {
+        return "<0.01";
+      }
+    }
+
+    const dotIndex = rounded.indexOf(".");
+    const integerPart =
+      dotIndex === -1 ? rounded : rounded.substring(0, dotIndex);
+    const decimalPart = dotIndex === -1 ? "" : rounded.substring(dotIndex + 1);
 
     const formattedInteger = parseFloat(integerPart).toLocaleString("en-US", {
       maximumFractionDigits: 0,

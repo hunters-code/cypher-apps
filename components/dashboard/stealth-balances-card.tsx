@@ -9,11 +9,7 @@ import { Info, Maximize2, Send, X, Link2 } from "lucide-react";
 import type { Asset } from "@/components/wallet/AssetList";
 import { ROUTES } from "@/lib/constants/routes";
 import { getAssetIcon } from "@/lib/utils/assetIcons";
-import {
-  formatCryptoAmount,
-  formatCurrency,
-  formatUSDValue,
-} from "@/lib/utils/format";
+import { formatCurrency, formatUSDValue } from "@/lib/utils/format";
 
 interface StealthBalancesCardProps {
   totalBalance: string | number;
@@ -74,7 +70,8 @@ export function StealthBalancesCard({
               bgColor,
               isCustomIcon,
             } = getAssetIcon(asset.symbol, asset.logoURI, asset.name);
-            const formattedAmount = formatCryptoAmount(asset.amount);
+            // asset.amount is already formatted in useDashboard
+            const formattedAmount = asset.amount;
             const formattedUSD = formatUSDValue(asset.usdValue);
             return (
               <div

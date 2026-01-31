@@ -13,10 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { useTokenPrices } from "@/hooks/useTokenPrices";
 import { useUsername } from "@/hooks/useUsername";
 import { ROUTES } from "@/lib/constants/routes";
-import { formatCryptoAmount } from "@/lib/utils/format";
+import { AVAILABLE_TOKENS } from "@/lib/constants/tokens";
+import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 import { hasSession } from "@/lib/utils/session";
+import { getTokenPriceOrZero } from "@/lib/utils/tokenPrice";
 
 export default function SendPage() {
   const router = useRouter();
@@ -39,6 +42,10 @@ export default function SendPage() {
   const [balanceError, setBalanceError] = useState("");
 
   const { balances, isLoading: balancesLoading } = useTokenBalances();
+  const { prices: tokenPrices } = useTokenPrices(AVAILABLE_TOKENS);
+  const tokenInfo = AVAILABLE_TOKENS.find((t) => t.symbol === token);
+  const priceUSD = tokenPrices[token] ?? 0;
+  const tokenPrice = getTokenPriceOrZero(tokenInfo, priceUSD);
   const balanceAmount = balances.find((b) => b.symbol === token)?.amount
     ? parseFloat(balances.find((b) => b.symbol === token)?.amount || "0")
     : 0;
@@ -120,8 +127,9 @@ export default function SendPage() {
       return;
     }
 
-    const tokenPrice = token === "CDT" ? 0.1 : 1790;
-    const usdValue = (parseFloat(amount) * tokenPrice).toFixed(2);
+    const usdValue = tokenInfo?.tradable
+      ? (parseFloat(amount) * tokenPrice).toFixed(2)
+      : "0";
 
     const params = new URLSearchParams({
       recipient: recipient.startsWith("@")
@@ -133,8 +141,8 @@ export default function SendPage() {
       token,
       private: isPrivate.toString(),
       usdValue,
-      fee: token === "CDT" ? "0" : "0.0002", // CDT transfers might have different fee
-      feeUSD: token === "CDT" ? "0" : "0.36",
+      fee: token === "CDT" ? "0" : "0.0002",
+      feeUSD: tokenInfo?.tradable ? "0.36" : "0",
     });
 
     router.push(`${ROUTES.SEND_CONFIRM}?${params.toString()}`);
@@ -253,9 +261,9 @@ export default function SendPage() {
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              {amount
-                ? `≈ $${(parseFloat(amount) * (token === "CDT" ? 0.1 : 1790)).toFixed(2)} USD`
-                : "≈ $0.00 USD"}
+              {amount && tokenInfo?.tradable
+                ? formatUSDValue(parseFloat(amount) * tokenPrice)
+                : "$0.00"}
             </span>
             <span>
               Balance:{" "}
@@ -263,7 +271,7 @@ export default function SendPage() {
                 ? "Loading..."
                 : balanceAmount
                   ? `${formatCryptoAmount(balanceAmount, 4)} ${token}`
-                  : `0 ${token}`}
+                  : `0.00 ${token}`}
             </span>
           </div>
           {balanceError && (
