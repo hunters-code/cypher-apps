@@ -38,7 +38,7 @@ function SendSuccessContent() {
   };
 
   return (
-    <div className="flex flex-col justify-between items-center gap-4 h-full w-full py-16 px-8">
+    <div className="mx-auto flex h-full w-full max-w-4xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
       <div className="flex flex-col items-center gap-8 text-center w-full">
         <div className="relative flex items-center justify-center">
           <div
@@ -143,12 +143,12 @@ function SendSuccessContent() {
           isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
         }`}
       >
-        <Button className="w-full" onClick={handleViewTransaction}>
+        <Button size="lg" className="w-full" onClick={handleViewTransaction}>
           View Transaction
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
           className="w-full"
           onClick={handleBackToDashboard}
         >
@@ -180,7 +180,7 @@ export default function SendSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col justify-center items-center gap-4 h-full w-full py-16 px-8">
+        <div className="mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center gap-4 px-4 py-8">
           <div className="text-muted-foreground">Loading...</div>
         </div>
       }

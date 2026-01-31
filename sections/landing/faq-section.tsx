@@ -43,13 +43,13 @@ export default function FaqSection() {
             ))}
           </div>
           <div className="p-4 pt-20 md:p-20">
-            <div className="sticky top-[7.5rem] mt-12 flex w-full items-center justify-between gap-5 rounded-xl bg-violet-500 p-6">
-              <h3 className="text-balance text-lg text-white">
+            <div className="sticky top-[7.5rem] mt-12 flex w-full items-center justify-between gap-5 rounded-xl bg-primary p-6">
+              <h3 className="text-balance text-lg text-primary-foreground">
                 Still have questions? We can help you get started.
               </h3>
               <Link
                 href={ROUTES.LOGIN}
-                className="shrink-0 rounded-full bg-white px-5 py-2 hover:bg-muted"
+                className="shrink-0 rounded-xl bg-primary-foreground px-5 py-2.5 font-medium text-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] hover:opacity-95"
               >
                 Get Started
               </Link>

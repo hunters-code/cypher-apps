@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
 import { motion } from "framer-motion";
-import { Copy, Check, Share2, Lock } from "lucide-react";
+import { Copy, Check, Share2, Lock, ArrowLeft } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useWallet } from "@/hooks/useWallet";
 import { ROUTES } from "@/lib/constants/routes";
 import { hasSession } from "@/lib/utils/session";
@@ -28,7 +26,7 @@ export default function ReceivePage() {
   });
 
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
-  const qrCodeValue = username; // QR code contains username, not wallet address
+  const qrCodeValue = username;
 
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(username);
@@ -71,280 +69,159 @@ export default function ReceivePage() {
   }
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col items-center gap-6 w-full px-4 py-8">
-          <div className="flex flex-col items-center gap-4 text-center w-full max-w-md">
-            <h1 className="text-3xl font-bold text-foreground text-left w-full">
-              Receive CDT Token
-            </h1>
-            <p className="text-base text-muted-foreground text-left w-full">
-              Scan QR code or share your username to receive CDT tokens
-              privately.
-            </p>
+    <div className="flex min-h-full flex-col">
+      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
+            Receive
+          </h1>
+          <p className="text-sm text-muted-foreground md:text-base">
+            Share your Cypher ID or QR code to receive tokens privately.
+          </p>
+        </div>
 
-            <div className="space-y-4 w-full">
-              <div className="flex justify-center">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  transition={{
-                    duration: 0.6,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: 0.1,
-                  }}
-                  className="relative"
-                >
-                  {/* Outer glow effect - animated */}
-                  <motion.div
-                    animate={{
-                      opacity: [0.3, 0.6, 0.3],
-                      scale: [1, 1.02, 1],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/20 to-primary/30 blur-2xl"
-                  />
-
-                  {/* Main container with gradient border */}
-                  <motion.div
-                    animate={{
-                      y: [0, -5, 0],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="relative border-2 border-gray-600/50 rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 w-full max-w-xs shadow-2xl backdrop-blur-sm"
-                  >
-                    {/* Gradient border glow */}
-                    <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br from-gray-600 via-gray-500 to-gray-600 opacity-30 blur-sm -z-10" />
-
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      {walletLoading || !username ? (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="p-3 sm:p-4 bg-background rounded-lg flex items-center justify-center h-32 w-32"
-                        >
-                          <div className="animate-pulse text-muted-foreground">
-                            Loading...
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{
-                            duration: 0.5,
-                            delay: 0.3,
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 20,
-                          }}
-                          className="relative p-4 bg-white rounded-xl shadow-2xl"
-                        >
-                          {/* Multiple pulse rings for depth */}
-                          <motion.div
-                            animate={{
-                              scale: [1, 1.08, 1],
-                              opacity: [0.2, 0, 0.2],
-                            }}
-                            transition={{
-                              duration: 2.5,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            }}
-                            className="absolute inset-0 rounded-xl bg-primary/20"
-                          />
-                          <motion.div
-                            animate={{
-                              scale: [1, 1.05, 1],
-                              opacity: [0.15, 0, 0.15],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                              delay: 0.3,
-                            }}
-                            className="absolute inset-0 rounded-xl bg-primary/15"
-                          />
-
-                          {/* QR Code with ghost icon */}
-                          <div className="relative z-10">
-                            <QRCodeSVG
-                              value={qrCodeValue}
-                              size={240}
-                              level="H"
-                              includeMargin={true}
-                              imageSettings={{
-                                src: "/ghost-icon.svg",
-                                height: 64,
-                                width: 64,
-                                excavate: true,
-                              }}
-                            />
-                          </div>
-
-                          {/* Shine effect overlay */}
-                          <motion.div
-                            animate={{
-                              x: ["-100%", "200%"],
-                            }}
-                            transition={{
-                              duration: 3,
-                              repeat: Infinity,
-                              repeatDelay: 2,
-                              ease: "easeInOut",
-                            }}
-                            className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent -z-0"
-                            style={{ transform: "skewX(-20deg)" }}
-                          />
-                        </motion.div>
-                      )}
-                      <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.5 }}
-                        className="text-sm font-medium text-white"
-                      >
-                        Receive CDT Token
-                      </motion.p>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="space-y-2"
-              >
-                <Label htmlFor="username" className="text-foreground">
-                  Your Cypher ID
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="username"
-                    value={username}
-                    readOnly
-                    className="flex-1"
-                  />
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleCopyId}
-                      className="shrink-0"
-                    >
-                      {copiedId ? (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 200 }}
-                        >
-                          <Check className="h-4 w-4 text-green-600" />
-                        </motion.div>
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </motion.div>
+        {/* QR Code card */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="overflow-hidden rounded-2xl border-2 border-primary bg-card shadow-lg"
+        >
+          <div className="rounded-t-2xl bg-gradient-to-br from-primary/5 via-background to-primary/5 p-6">
+            <div className="flex flex-col items-center gap-4">
+              {walletLoading || !username ? (
+                <div className="flex h-52 w-52 items-center justify-center rounded-xl bg-muted/50">
+                  <p className="text-sm text-muted-foreground">Loading...</p>
                 </div>
-                <p className="text-xs text-muted-foreground text-left">
-                  Share this username to receive crypto privately
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="space-y-2"
-              >
-                <Label htmlFor="address" className="text-foreground">
-                  Your Wallet Address
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="address"
-                    value={walletAddress}
-                    readOnly
-                    className="flex-1 text-xs font-mono"
+              ) : (
+                <div className="rounded-xl bg-white p-4 shadow-inner">
+                  <QRCodeSVG
+                    value={qrCodeValue}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                    imageSettings={{
+                      src: "/ghost-icon.svg",
+                      height: 48,
+                      width: 48,
+                      excavate: true,
+                    }}
                   />
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleCopyAddress}
-                      className="shrink-0"
-                    >
-                      {copiedAddress ? (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 200 }}
-                        >
-                          <Check className="h-4 w-4 text-green-600" />
-                        </motion.div>
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </motion.div>
                 </div>
-                <p className="text-xs text-muted-foreground text-left">
-                  Direct wallet address (public) - or use username for private
-                  transfers
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="p-4 border rounded-lg bg-muted/30"
-              >
-                <div className="flex items-start gap-3">
-                  <Lock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        Private by Default
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground text-left">
-                      Scan this QR code to send CDT tokens to your username.
-                      Funds will use stealth addresses and remain private.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+              )}
+              <p className="text-sm font-medium text-foreground">
+                Scan to send CDT
+              </p>
             </div>
           </div>
-        </div>
-      </div>
+          <div className="flex items-center justify-center rounded-b-2xl bg-primary py-3">
+            <p className="text-sm font-medium text-primary-foreground">
+              Payments received privately through Cypher
+            </p>
+          </div>
+        </motion.div>
 
-      <div className="flex flex-col gap-3 w-full px-4 py-4 bg-background border-t border-border shrink-0">
-        <Button className="w-full" onClick={handleShare}>
-          <Share2 className="mr-2 h-4 w-4" />
-          Share QR Code
-        </Button>
-        <Button variant="secondary" className="w-full" onClick={handleBack}>
-          Back
-        </Button>
+        {/* Your Cypher ID */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-2xl border border-border bg-card p-4 shadow-sm md:p-5"
+        >
+          <p className="mb-3 text-sm font-medium text-muted-foreground">
+            Your Cypher ID
+          </p>
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+              {username}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleCopyId}
+              className="shrink-0 text-muted-foreground hover:text-primary"
+              aria-label="Copy"
+            >
+              {copiedId ? (
+                <Check className="h-4 w-4 text-primary" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          {copiedId && (
+            <p className="mt-2 text-xs text-primary">Copied to clipboard</p>
+          )}
+        </motion.div>
+
+        {/* Wallet address */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-2xl border border-border bg-card p-4 shadow-sm md:p-5"
+        >
+          <p className="mb-3 text-sm font-medium text-muted-foreground">
+            Wallet address (public)
+          </p>
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3">
+            <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground md:text-sm">
+              {walletAddress}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleCopyAddress}
+              className="shrink-0 text-muted-foreground hover:text-primary"
+              aria-label="Copy address"
+            >
+              {copiedAddress ? (
+                <Check className="h-4 w-4 text-primary" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          {copiedAddress && (
+            <p className="mt-2 text-xs text-primary">Copied to clipboard</p>
+          )}
+        </motion.div>
+
+        {/* Private info */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"
+        >
+          <Lock className="h-5 w-5 shrink-0 text-primary" />
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              Private by default
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              When someone sends to your Cypher ID, funds use stealth addresses
+              and stay private on-chain.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col gap-3 pt-2"
+        >
+          <Button size="lg" className="w-full" onClick={handleShare}>
+            <Share2 className="mr-2 h-5 w-5" />
+            Share to receive
+          </Button>
+          <Button variant="outline" className="w-full" onClick={handleBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </motion.div>
       </div>
     </div>
   );
