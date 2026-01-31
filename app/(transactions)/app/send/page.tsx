@@ -2,13 +2,21 @@
 
 import { useState, useEffect } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { QrCode, Loader2, Check, X } from "lucide-react";
+import { QrCode, Loader2, Check, X, ChevronDown, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBaseProvider } from "@/hooks/useBlockchain";
@@ -16,10 +24,64 @@ import { useTokenBalances } from "@/hooks/useTokenBalances";
 import { useTokenPrices } from "@/hooks/useTokenPrices";
 import { useUsername } from "@/hooks/useUsername";
 import { ROUTES } from "@/lib/constants/routes";
-import { AVAILABLE_TOKENS } from "@/lib/constants/tokens";
+import {
+  AVAILABLE_TOKENS,
+  SEND_TOKEN_OPTIONS,
+  TOKEN_ICONS,
+} from "@/lib/constants/tokens";
 import { formatCryptoAmount, formatUSDValue } from "@/lib/utils/format";
 import { hasSession } from "@/lib/utils/session";
 import { getTokenPriceOrZero } from "@/lib/utils/tokenPrice";
+
+const TOKEN_COLORS: Record<string, { bg: string; text: string }> = {
+  ETH: { bg: "bg-blue-500/20", text: "text-blue-600" },
+  CDT: { bg: "bg-emerald-500/20", text: "text-emerald-600" },
+};
+
+function TokenIconBadge({
+  symbol,
+  name,
+  logoURI,
+  size = "md",
+}: {
+  symbol: string;
+  name?: string;
+  logoURI?: string;
+  size?: "sm" | "md";
+}) {
+  const sizeClass = size === "sm" ? "h-6 w-6" : "h-8 w-8";
+  const iconSrc = logoURI ?? TOKEN_ICONS[symbol];
+
+  if (iconSrc) {
+    const dim = size === "sm" ? 24 : 32;
+    return (
+      <span
+        className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full ${sizeClass} bg-muted/20`}
+      >
+        <Image
+          src={iconSrc}
+          alt={symbol}
+          width={dim}
+          height={dim}
+          className="object-cover"
+        />
+      </span>
+    );
+  }
+
+  const letter = (symbol || name?.charAt(0) || "?").charAt(0).toUpperCase();
+  const colors = TOKEN_COLORS[symbol] ?? {
+    bg: "bg-muted/30",
+    text: "text-muted-foreground",
+  };
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-full font-semibold ${sizeClass} text-xs ${colors.bg} ${colors.text}`}
+    >
+      {letter}
+    </span>
+  );
+}
 
 export default function SendPage() {
   const router = useRouter();
@@ -40,6 +102,14 @@ export default function SendPage() {
   const [recipientValid, setRecipientValid] = useState<boolean | null>(null);
   const [recipientError, setRecipientError] = useState("");
   const [balanceError, setBalanceError] = useState("");
+  const [tokenModalOpen, setTokenModalOpen] = useState(false);
+  const [tokenSearch, setTokenSearch] = useState("");
+
+  const filteredTokens = SEND_TOKEN_OPTIONS.filter(
+    (t) =>
+      t.symbol.toLowerCase().includes(tokenSearch.toLowerCase().trim()) ||
+      t.name.toLowerCase().includes(tokenSearch.toLowerCase().trim())
+  );
 
   const { balances, isLoading: balancesLoading } = useTokenBalances();
   const { prices: tokenPrices } = useTokenPrices(AVAILABLE_TOKENS);
@@ -242,22 +312,103 @@ export default function SendPage() {
               className="flex-1"
               min={0}
             />
-            <div className="flex gap-1">
-              <Button
-                variant={token === "ETH" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setToken("ETH")}
-              >
-                ETH
-              </Button>
-              <Button
-                variant={token === "CDT" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setToken("CDT")}
-              >
-                CDT
-              </Button>
-            </div>
+            <Dialog
+              open={tokenModalOpen}
+              onOpenChange={(open) => {
+                setTokenModalOpen(open);
+                if (!open) setTokenSearch("");
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="min-w-[5rem] justify-between gap-2"
+                  type="button"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <TokenIconBadge
+                      symbol={token}
+                      name={
+                        SEND_TOKEN_OPTIONS.find((t) => t.symbol === token)?.name
+                      }
+                      logoURI={TOKEN_ICONS[token]}
+                      size="sm"
+                    />
+                    {token}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Select Token</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search tokens..."
+                      value={tokenSearch}
+                      onChange={(e) => setTokenSearch(e.target.value)}
+                      className="pl-9"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="max-h-56 overflow-y-auto rounded-lg border border-border">
+                    {filteredTokens.length === 0 ? (
+                      <p className="p-4 text-center text-sm text-muted-foreground">
+                        No token found
+                      </p>
+                    ) : (
+                      <ul className="divide-y divide-border">
+                        {filteredTokens.map((t) => {
+                          const bal = balances.find(
+                            (b) => b.symbol === t.symbol
+                          );
+                          const balAmount = bal?.amount
+                            ? parseFloat(bal.amount)
+                            : 0;
+                          return (
+                            <li key={t.symbol}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setToken(t.symbol);
+                                  setTokenModalOpen(false);
+                                  setTokenSearch("");
+                                }}
+                                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none"
+                              >
+                                <TokenIconBadge
+                                  symbol={t.symbol}
+                                  name={t.name}
+                                  logoURI={t.logoURI}
+                                  size="md"
+                                />
+                                <div className="min-w-0 flex-1 flex flex-col items-start">
+                                  <span className="font-medium">
+                                    {t.symbol}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {t.name}
+                                  </span>
+                                </div>
+                                <span className="shrink-0 text-sm text-muted-foreground">
+                                  {balancesLoading
+                                    ? "..."
+                                    : `${formatCryptoAmount(balAmount, 4)}`}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>

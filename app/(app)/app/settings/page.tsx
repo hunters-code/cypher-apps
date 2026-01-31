@@ -5,20 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
-import {
-  Copy,
-  Check,
-  User,
-  Wallet,
-  Shield,
-  Lock,
-  Bell,
-  DollarSign,
-  HelpCircle,
-  FileText,
-  LogOut,
-  ChevronRight,
-} from "lucide-react";
+import { Copy, Check, User, Wallet, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,13 +17,12 @@ import {
   ItemActions,
   ItemSeparator,
 } from "@/components/ui/item";
-import { Switch } from "@/components/ui/switch";
 import { ROUTES } from "@/lib/constants/routes";
 import { hasSession, clearSession } from "@/lib/utils/session";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [_notificationsEnabled, _setNotificationsEnabled] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedUsername, setCopiedUsername] = useState(false);
 
@@ -81,7 +67,9 @@ export default function SettingsPage() {
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 w-full px-4 py-8">
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <h1 className="font-urbanist text-3xl font-bold text-foreground">
+            Settings
+          </h1>
           <div className="space-y-6">
             <div className="space-y-3">
               <h2 className="text-lg font-semibold text-foreground">Account</h2>
@@ -138,121 +126,6 @@ export default function SettingsPage() {
                     )}
                   </Button>
                 </ItemActions>
-              </Item>
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">
-                Security
-              </h2>
-              <Item
-                variant="default"
-                className="cursor-pointer hover:bg-muted/50 w-full"
-              >
-                <ItemMedia variant="icon">
-                  <Shield className="h-4 w-4 text-primary" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Backup & Recovery</ItemTitle>
-                  <ItemDescription>Save your wallet securely</ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </ItemActions>
-              </Item>
-              <ItemSeparator />
-              <Item
-                variant="default"
-                className="cursor-pointer hover:bg-muted/50 w-full"
-              >
-                <ItemMedia variant="icon">
-                  <Lock className="h-4 w-4 text-primary" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Privacy Settings</ItemTitle>
-                  <ItemDescription>
-                    Manage stealth address preferences
-                  </ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </ItemActions>
-              </Item>
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">
-                Preferences
-              </h2>
-              <Item
-                variant="default"
-                className="cursor-pointer hover:bg-muted/50"
-              >
-                <ItemMedia variant="icon">
-                  <DollarSign className="h-4 w-4 text-primary" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Currency</ItemTitle>
-                  <ItemDescription>USD - United States Dollar</ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </ItemActions>
-              </Item>
-              <ItemSeparator />
-              <Item variant="default">
-                <ItemMedia variant="icon">
-                  <Bell className="h-4 w-4 text-primary" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Notifications</ItemTitle>
-                  <ItemDescription>Transaction alerts</ItemDescription>
-                </ItemContent>
-                <ItemActions>
-                  <Switch
-                    checked={notificationsEnabled}
-                    onCheckedChange={setNotificationsEnabled}
-                  />
-                </ItemActions>
-              </Item>
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">About</h2>
-              <Item
-                variant="default"
-                className="cursor-pointer hover:bg-muted/50"
-              >
-                <ItemMedia variant="icon">
-                  <HelpCircle className="h-4 w-4 text-primary" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Help & Support</ItemTitle>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </ItemActions>
-              </Item>
-              <ItemSeparator />
-              <Item
-                variant="default"
-                className="cursor-pointer hover:bg-muted/50"
-              >
-                <ItemMedia variant="icon">
-                  <FileText className="h-4 w-4 text-primary" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>Terms & Privacy</ItemTitle>
-                </ItemContent>
-                <ItemActions>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </ItemActions>
-              </Item>
-              <ItemSeparator />
-              <Item variant="default">
-                <ItemContent>
-                  <ItemDescription>Version 1.0.0</ItemDescription>
-                </ItemContent>
               </Item>
             </div>
 
