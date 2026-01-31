@@ -18,12 +18,12 @@ export function LandingLayoutWrapper({
 
   if (isLanding) {
     return (
-      <>
+      <div className="flex min-h-screen flex-col">
         <LenisScroll />
         <LandingNavbar />
-        {children}
+        <div className="flex flex-1 flex-col md:justify-center">{children}</div>
         <LandingFooter />
-      </>
+      </div>
     );
   }
 
