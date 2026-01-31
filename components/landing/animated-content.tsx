@@ -74,7 +74,7 @@ const AnimatedContent: React.FC<AnimatedContentProps> = ({
 
     const st = ScrollTrigger.create({
       trigger: el,
-      scroller: (scrollerTarget as Window) || undefined,
+      scroller: scrollerTarget ?? undefined,
       start: `top ${startPct}%`,
       once: true,
       onEnter: () => tl.play(),
