@@ -41,9 +41,6 @@ export async function recoverMetaKeys(
         (error.message.includes("network changed") ||
           error.message.includes("NETWORK_ERROR"))
       ) {
-        console.warn(
-          "Network change during signature request, but signature may still be valid"
-        );
         throw new Error(
           "Network error during signature. Please ensure you're on Base network and try again."
         );

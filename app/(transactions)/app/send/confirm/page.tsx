@@ -35,9 +35,7 @@ function SendConfirmContent() {
   const fee = searchParams.get("fee") || "0.0002";
   const feeUSD = searchParams.get("feeUSD") || "0.36";
 
-  // Get token info
   const tokenInfo = BASE_TOKENS[token];
-  // const isNativeToken = !tokenInfo || tokenInfo.address === "native";
 
   const handleConfirm = async () => {
     setIsLoading(true);
@@ -56,19 +54,15 @@ function SendConfirmContent() {
       let ephemeralPublicKey: string | null = null;
       let txHash: string;
 
-      // If private mode, generate stealth address
       if (isPrivate && recipient.startsWith("@")) {
         const cleanRecipient = recipient.replace(/^@+/, "");
 
-        // Get recipient's viewing key
         const viewingKey = await getViewingKey(provider, cleanRecipient);
 
-        // Generate stealth address
         const stealthResult = generateStealthAddress(viewingKey);
         stealthAddress = stealthResult.stealthAddress;
         ephemeralPublicKey = stealthResult.ephemeralPublicKey;
 
-        // Send token to stealth address
         const receipt = await sendToken(
           signer,
           tokenInfo,
@@ -82,7 +76,6 @@ function SendConfirmContent() {
 
         txHash = receipt.hash;
 
-        // Announce the stealth transaction (optional, non-blocking)
         try {
           await announceStealthTransaction(
             signer,
@@ -94,15 +87,8 @@ function SendConfirmContent() {
               message: `Private transfer to ${recipient}`,
             }
           );
-        } catch (announcementError) {
-          console.warn(
-            "Failed to announce stealth transaction:",
-            announcementError
-          );
-          // Continue anyway - the transfer already succeeded
-        }
+        } catch {}
       } else {
-        // Regular transfer (public)
         let toAddress: string;
 
         if (recipient.startsWith("0x")) {
@@ -112,7 +98,6 @@ function SendConfirmContent() {
           toAddress = await getAddress(provider, cleanRecipient);
         }
 
-        // Send token
         const receipt = await sendToken(signer, tokenInfo, toAddress, amount);
 
         if (!receipt) {
@@ -134,12 +119,21 @@ function SendConfirmContent() {
 
       router.push(`${ROUTES.SEND_SUCCESS}?${params.toString()}`);
     } catch (err) {
-      console.error("Transaction failed:", err);
       if (err instanceof Error) {
         if (err.message.includes("user rejected")) {
           setError("Transaction cancelled");
-        } else if (err.message.includes("insufficient funds")) {
-          setError("Insufficient balance for transaction");
+        } else if (
+          err.message.includes("insufficient funds") ||
+          err.message.includes("Insufficient ETH") ||
+          err.message.includes("insufficient funds for gas")
+        ) {
+          if (err.message.includes("for gas")) {
+            setError(
+              "Insufficient ETH for gas fees. Please add ETH to your wallet to pay for transaction fees."
+            );
+          } else {
+            setError("Insufficient balance for transaction");
+          }
         } else {
           setError(err.message || "Transaction failed. Please try again.");
         }

@@ -38,10 +38,10 @@ export default function SendPage() {
   const [balanceError, setBalanceError] = useState("");
 
   const { balances, isLoading: balancesLoading } = useTokenBalances();
-  const tokenBalance = balances.find((b) => b.symbol === token);
-  const balanceAmount = tokenBalance ? parseFloat(tokenBalance.amount) : 0;
+  const balanceAmount = balances.find((b) => b.symbol === token)?.amount
+    ? parseFloat(balances.find((b) => b.symbol === token)?.amount || "0")
+    : 0;
 
-  // Validate recipient (username or address)
   useEffect(() => {
     if (!recipient.trim() || !provider) {
       setRecipientValid(null);
@@ -56,27 +56,21 @@ export default function SendPage() {
       try {
         const cleanRecipient = recipient.replace(/^@+/, "");
 
-        // Check if it's a valid Ethereum address
         if (recipient.startsWith("0x") && recipient.length === 42) {
           setRecipientValid(true);
           setIsValidatingRecipient(false);
           return;
         }
 
-        // Check if username is available (meaning it does NOT exist)
-        // For sending, we want the username to be TAKEN (not available)
         const isAvailable = await checkAvailability(cleanRecipient);
 
         if (isAvailable === false) {
-          // Username is taken (registered), which is what we want for sending
           setRecipientValid(true);
           setRecipientError("");
         } else if (isAvailable === true) {
-          // Username is available (not registered), cannot send to it
           setRecipientValid(false);
           setRecipientError("Username not found");
         } else {
-          // Error or null result
           setRecipientValid(false);
           setRecipientError("Could not verify username");
         }
@@ -92,7 +86,6 @@ export default function SendPage() {
     return () => clearTimeout(timeoutId);
   }, [recipient, provider, checkAvailability]);
 
-  // Validate amount against balance
   useEffect(() => {
     if (!amount.trim()) {
       setBalanceError("");
@@ -264,8 +257,8 @@ export default function SendPage() {
                 Balance:{" "}
                 {balancesLoading
                   ? "Loading..."
-                  : tokenBalance
-                    ? `${formatCryptoAmount(tokenBalance.amount, 4)} ${token}`
+                  : balanceAmount
+                    ? `${formatCryptoAmount(balanceAmount, 4)} ${token}`
                     : `0 ${token}`}
               </span>
             </div>

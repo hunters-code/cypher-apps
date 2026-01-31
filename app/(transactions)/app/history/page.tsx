@@ -5,93 +5,29 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, RefreshCw } from "lucide-react";
 
 import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  useTransactionHistory,
+  type Transaction,
+} from "@/hooks/useTransactionHistory";
 import { ROUTES } from "@/lib/constants/routes";
 import { hasSession } from "@/lib/utils/session";
-
-interface Transaction {
-  id: string;
-  type: "SEND" | "RECEIVE";
-  username: string;
-  amount: string;
-  token: string;
-  timestamp: string;
-  isPrivate?: boolean;
-  dateGroup: string;
-}
-
-const allMockTransactions: Transaction[] = [
-  {
-    id: "1",
-    type: "SEND",
-    username: "alice",
-    amount: "1.5",
-    token: "ETH",
-    timestamp: "2 hours ago",
-    isPrivate: true,
-    dateGroup: "Today",
-  },
-  {
-    id: "2",
-    type: "RECEIVE",
-    username: "bob",
-    amount: "0.5",
-    token: "ETH",
-    timestamp: "5 hours ago",
-    isPrivate: false,
-    dateGroup: "Today",
-  },
-  {
-    id: "3",
-    type: "RECEIVE",
-    username: "charlie",
-    amount: "100",
-    token: "USDC",
-    timestamp: "1 day ago",
-    isPrivate: true,
-    dateGroup: "Yesterday",
-  },
-  {
-    id: "4",
-    type: "SEND",
-    username: "david",
-    amount: "0.1",
-    token: "ETH",
-    timestamp: "2 days ago",
-    isPrivate: false,
-    dateGroup: "2 days ago",
-  },
-  {
-    id: "5",
-    type: "RECEIVE",
-    username: "eve",
-    amount: "50",
-    token: "USDC",
-    timestamp: "3 days ago",
-    isPrivate: true,
-    dateGroup: "3 days ago",
-  },
-  {
-    id: "6",
-    type: "SEND",
-    username: "frank",
-    amount: "2.0",
-    token: "ETH",
-    timestamp: "4 days ago",
-    isPrivate: true,
-    dateGroup: "4 days ago",
-  },
-];
 
 const ITEMS_PER_PAGE = 5;
 
 export default function HistoryPage() {
   const router = useRouter();
   const { authenticated, ready } = usePrivy();
+  const {
+    transactions: allTransactions,
+    isLoading,
+    error,
+    refetch,
+  } = useTransactionHistory();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("All Types");
   const [selectedToken, setSelectedToken] = useState<string>("All Tokens");
@@ -100,7 +36,7 @@ export default function HistoryPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const filteredTransactions = useMemo(() => {
-    let filtered = allMockTransactions;
+    let filtered = allTransactions;
 
     if (searchQuery) {
       filtered = filtered.filter(
@@ -120,7 +56,7 @@ export default function HistoryPage() {
     }
 
     return filtered;
-  }, [searchQuery, selectedType, selectedToken]);
+  }, [allTransactions, searchQuery, selectedType, selectedToken]);
 
   const displayedTransactions = useMemo(() => {
     return filteredTransactions.slice(0, displayedCount);
@@ -139,11 +75,18 @@ export default function HistoryPage() {
 
   const hasMore = displayedCount < filteredTransactions.length;
 
+  const filterKey = useMemo(
+    () => `${searchQuery}-${selectedType}-${selectedToken}`,
+    [searchQuery, selectedType, selectedToken]
+  );
+  const prevFilterKeyRef = useRef(filterKey);
+
   useEffect(() => {
-    // Reset displayed count when filters change
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDisplayedCount(ITEMS_PER_PAGE);
-  }, [searchQuery, selectedType, selectedToken]);
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      queueMicrotask(() => setDisplayedCount(ITEMS_PER_PAGE));
+    }
+  }, [filterKey]);
 
   useEffect(() => {
     if (!hasMore || !loadMoreRef.current) return;
@@ -199,6 +142,16 @@ export default function HistoryPage() {
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => refetch()}
+                disabled={isLoading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowSearch(!showSearch)}
               >
                 <Search className="h-4 w-4" />
@@ -243,46 +196,74 @@ export default function HistoryPage() {
             )}
           </div>
 
-          <div className="space-y-6">
-            {Object.entries(groupedTransactions).map(
-              ([dateGroup, transactions]) => (
-                <div key={dateGroup} className="space-y-4">
-                  <h2 className="font-semibold text-foreground">{dateGroup}</h2>
-                  <div className="space-y-2">
-                    {transactions.map((transaction) => (
-                      <RecentActivityItem
-                        key={transaction.id}
-                        type={transaction.type}
-                        username={transaction.username}
-                        amount={transaction.amount}
-                        token={transaction.token}
-                        timestamp={transaction.timestamp}
-                        isPrivate={transaction.isPrivate}
-                        onClick={() => handleTransactionClick(transaction)}
-                      />
-                    ))}
+          {isLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 w-full rounded-lg bg-muted animate-pulse"
+                />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-destructive">{error}</p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => refetch()}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(groupedTransactions).map(
+                ([dateGroup, transactions]) => (
+                  <div key={dateGroup} className="space-y-4">
+                    <h2 className="font-semibold text-foreground">
+                      {dateGroup}
+                    </h2>
+                    <div className="space-y-2">
+                      {transactions.map((transaction) => (
+                        <RecentActivityItem
+                          key={transaction.id}
+                          type={transaction.type}
+                          username={transaction.username}
+                          amount={transaction.amount}
+                          token={transaction.token}
+                          timestamp={transaction.timestamp}
+                          isPrivate={transaction.isPrivate}
+                          onClick={() => handleTransactionClick(transaction)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
+
+              {filteredTransactions.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <p className="text-muted-foreground">No transactions found</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {searchQuery ||
+                    selectedType !== "All Types" ||
+                    selectedToken !== "All Tokens"
+                      ? "Try adjusting your filters"
+                      : "You haven't received any transactions yet"}
+                  </p>
+                </div>
+              )}
+
+              {hasMore && (
+                <div ref={loadMoreRef} className="flex justify-center py-4">
+                  <div className="text-sm text-muted-foreground">
+                    Loading more...
                   </div>
                 </div>
-              )
-            )}
-
-            {filteredTransactions.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground">No transactions found</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Try adjusting your filters
-                </p>
-              </div>
-            )}
-
-            {hasMore && (
-              <div ref={loadMoreRef} className="flex justify-center py-4">
-                <div className="text-sm text-muted-foreground">
-                  Loading more...
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

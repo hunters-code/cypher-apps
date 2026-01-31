@@ -50,9 +50,7 @@ export default function ReceivePage() {
           text: `Send me crypto: ${username}`,
           url: window.location.href,
         });
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
+      } catch {}
     } else {
       handleCopyId();
     }

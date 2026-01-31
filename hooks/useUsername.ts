@@ -1,7 +1,3 @@
-/**
- * Hook for username availability checking
- */
-
 import { useState, useCallback } from "react";
 
 import { checkUsernameAvailability } from "@/lib/blockchain";
@@ -35,8 +31,7 @@ export function useUsername() {
         );
         setAvailability(isAvailable);
         return isAvailable;
-      } catch (error) {
-        console.error("Error checking username availability:", error);
+      } catch {
         setAvailability(null);
         return null;
       } finally {

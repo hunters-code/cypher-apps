@@ -1,11 +1,10 @@
-/**
- * Event Scanner for Stealth Address Transactions
- * Scans blockchain events to find incoming transfers
- */
-
 import { ethers } from "ethers";
 
-import { ANNOUNCEMENT_ADDRESS, ANNOUNCEMENT_ABI } from "@/lib/constants";
+import {
+  ANNOUNCEMENT_ADDRESS,
+  ANNOUNCEMENT_ABI,
+  BASE_CHAIN_ID,
+} from "@/lib/constants";
 
 import { computeStealthAddress } from "./stealth";
 
@@ -26,136 +25,435 @@ export interface ParsedMetadata {
   message?: string;
 }
 
-/**
- * Scan for incoming stealth address transactions
- * @param provider - Ethers provider
- * @param viewingKeyPrivate - User's private viewing key
- * @param fromBlock - Starting block number
- * @param toBlock - Ending block number (default: 'latest')
- * @returns Array of matching announcement events
- */
-export async function scanForIncomingTransfers(
-  provider: ethers.Provider,
-  viewingKeyPrivate: string,
-  fromBlock: number,
-  toBlock: number | "latest" = "latest"
-): Promise<AnnouncementEvent[]> {
+function getBlockscoutUrl(): string {
+  if (BASE_CHAIN_ID === 84532) {
+    return "https://base-sepolia.blockscout.com";
+  }
+  return "https://base.blockscout.com";
+}
+
+interface BlockscoutTransaction {
+  hash: string;
+  block_number: number;
+  timestamp: string;
+  from: {
+    hash: string;
+  };
+  to: {
+    hash: string;
+  } | null;
+  method: string | null;
+  decoded_input?: {
+    parameters?: Array<{
+      name: string;
+      type: string;
+      value: string;
+    }>;
+  };
+  logs?: Array<{
+    address: string | { hash: string };
+    topics: string[];
+    data: string;
+  }>;
+}
+
+interface BlockscoutResponse {
+  items: BlockscoutTransaction[];
+  next_page_params: {
+    page: string;
+    page_size: string;
+  } | null;
+}
+
+async function fetchTransactionLogs(
+  blockscoutUrl: string,
+  txHash: string
+): Promise<
+  Array<{
+    address: string | { hash: string };
+    topics: string[];
+    data: string;
+  }>
+> {
   try {
-    const announcementContract = new ethers.Contract(
-      ANNOUNCEMENT_ADDRESS,
-      ANNOUNCEMENT_ABI,
-      provider
-    );
-
-    // Query all Announcement events
-    const filter = announcementContract.filters.Announcement();
-    const events = await announcementContract.queryFilter(
-      filter,
-      fromBlock,
-      toBlock
-    );
-
-    const matchingEvents: AnnouncementEvent[] = [];
-
-    // Process each event
-    for (const event of events) {
-      // Type guard: check if event is EventLog with args
-      if (!("args" in event) || !event.args) continue;
-
-      const {
-        sender,
-        stealthAddress: eventStealthAddress,
-        ephemeralPublicKey,
-        metadata,
-        blockNumber,
-        timestamp,
-      } = event.args;
-
-      // Compute stealth address from viewing key + ephemeral public key
-      const computedStealthAddress = computeStealthAddress(
-        viewingKeyPrivate,
-        ephemeralPublicKey
-      );
-
-      // Convert event stealth address to address format for comparison
-      const eventStealthAddressStr = ethers.getAddress(
-        ethers.dataSlice(eventStealthAddress, 0, 20)
-      );
-
-      // Check if this stealth address matches (belongs to user)
-      if (
-        computedStealthAddress.toLowerCase() ===
-        eventStealthAddressStr.toLowerCase()
-      ) {
-        // Get block timestamp if not provided in event
-        let eventTimestamp = timestamp;
-        if (!eventTimestamp || eventTimestamp === BigInt(0)) {
-          const block = await provider.getBlock(Number(blockNumber));
-          eventTimestamp = BigInt(block?.timestamp || 0);
-        }
-
-        matchingEvents.push({
-          sender: ethers.getAddress(sender),
-          stealthAddress: eventStealthAddressStr,
-          ephemeralPublicKey: ephemeralPublicKey,
-          metadata: metadata,
-          blockNumber: Number(blockNumber),
-          timestamp: Number(eventTimestamp),
-          transactionHash: event.transactionHash,
-        });
+    const response = await fetch(
+      `${blockscoutUrl}/api/v2/transactions/${txHash}/logs`,
+      {
+        headers: {
+          accept: "application/json",
+        },
       }
-    }
+    );
 
-    return matchingEvents;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (
-      errorMessage.includes("no backend is currently healthy") ||
-      errorMessage.includes("UNKNOWN_ERROR") ||
-      errorMessage.includes("could not coalesce error")
-    ) {
+    if (!response.ok) {
       return [];
     }
-    console.error("Error scanning for incoming transfers:", error);
+
+    const data = await response.json();
+    return data.items || [];
+  } catch {
     return [];
   }
 }
 
-/**
- * Parse metadata from announcement event
- * Metadata format: encoded JSON or ABI-encoded data
- */
+async function fetchTransactionsFromBlockscout(
+  address: string
+): Promise<BlockscoutTransaction[]> {
+  const blockscoutUrl = getBlockscoutUrl();
+
+  try {
+    const url = `${blockscoutUrl}/api/v2/addresses/${address}/transactions`;
+
+    const response = await fetch(url, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Blockscout API error: ${response.statusText}`);
+    }
+
+    const data: BlockscoutResponse = await response.json();
+    const allTransactions = data.items || [];
+
+    const transactionsWithLogs: BlockscoutTransaction[] = [];
+
+    for (const tx of allTransactions) {
+      if (!tx.to || tx.to.hash.toLowerCase() !== address.toLowerCase()) {
+        continue;
+      }
+
+      if (tx.method !== "announce") {
+        continue;
+      }
+
+      const logs = await fetchTransactionLogs(blockscoutUrl, tx.hash);
+
+      transactionsWithLogs.push({
+        ...tx,
+        logs,
+      });
+    }
+
+    return transactionsWithLogs;
+  } catch {
+    return [];
+  }
+}
+
+type BlockscoutLog = {
+  address: string | { hash: string };
+  topics: string[];
+  data: string;
+};
+
+function decodeAnnouncementEvent(
+  log: BlockscoutLog,
+  transactionHash: string,
+  blockNumber: number,
+  timestamp: string,
+  transactionInput?: BlockscoutTransaction["decoded_input"]
+): AnnouncementEvent | null {
+  try {
+    if (!log.topics || !log.topics.length) {
+      return null;
+    }
+
+    const actualTopic = log.topics[0];
+
+    const announcementContract = new ethers.Contract(
+      ANNOUNCEMENT_ADDRESS,
+      ANNOUNCEMENT_ABI,
+      null
+    );
+
+    const iface = announcementContract.interface;
+
+    let decodedLog: ethers.Result;
+    let announcementEventFragment: ethers.EventFragment | null = null;
+
+    try {
+      announcementEventFragment = iface.getEvent("Announcement");
+      if (announcementEventFragment) {
+        const eventTopic = announcementEventFragment.topicHash;
+
+        if (actualTopic === eventTopic) {
+          decodedLog = iface.decodeEventLog(
+            announcementEventFragment,
+            log.data,
+            log.topics
+          );
+        } else {
+          throw new Error("Topic mismatch");
+        }
+      } else {
+        throw new Error("Event fragment not found");
+      }
+    } catch {
+      if (log.topics.length < 4) {
+        return null;
+      }
+
+      const sender = ethers.getAddress("0x" + log.topics[1].slice(26));
+
+      let stealthAddressStr = "";
+      if (log.topics[2]) {
+        stealthAddressStr = ethers.getAddress("0x" + log.topics[2].slice(26));
+      } else {
+        return null;
+      }
+
+      let ephemeralPublicKeyFromInput = "";
+      if (transactionInput?.parameters) {
+        const ephemeralParam = transactionInput.parameters.find(
+          (p) => p.name === "ephemeralPubKey" || p.name === "ephemeralPublicKey"
+        );
+        if (ephemeralParam) {
+          ephemeralPublicKeyFromInput = ephemeralParam.value;
+        }
+      }
+
+      let ephemeralPublicKey = ephemeralPublicKeyFromInput || "0x";
+      let metadata = "0x";
+
+      if (transactionInput?.parameters) {
+        const metadataParam = transactionInput.parameters.find(
+          (p) => p.name === "metadata"
+        );
+        if (
+          metadataParam &&
+          metadataParam.value &&
+          metadataParam.value !== "0x"
+        ) {
+          metadata = metadataParam.value;
+        }
+      }
+
+      let blockNumberFromEvent = blockNumber;
+
+      if (!ephemeralPublicKey || ephemeralPublicKey === "0x") {
+        if (log.data && log.data !== "0x") {
+          try {
+            const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+            const decoded = abiCoder.decode(
+              ["bytes", "bytes", "uint256", "uint256"],
+              log.data
+            );
+            ephemeralPublicKey = decoded[0];
+            metadata = decoded[1];
+            blockNumberFromEvent = Number(decoded[2] || BigInt(blockNumber));
+          } catch {
+            try {
+              const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+              const decoded = abiCoder.decode(
+                ["bytes", "uint256", "uint256"],
+                log.data
+              );
+              ephemeralPublicKey = decoded[0];
+              metadata = "0x";
+              blockNumberFromEvent = Number(decoded[1] || BigInt(blockNumber));
+            } catch {
+              return null;
+            }
+          }
+        } else {
+          return null;
+        }
+      } else {
+        if (!metadata || metadata === "0x") {
+          if (log.data && log.data !== "0x") {
+            try {
+              const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+              const decoded = abiCoder.decode(
+                ["bytes", "uint256", "uint256"],
+                log.data
+              );
+              metadata = decoded[0];
+              blockNumberFromEvent = Number(decoded[1] || BigInt(blockNumber));
+            } catch {
+              metadata = log.data;
+            }
+          }
+        }
+      }
+
+      let finalTimestamp: number;
+      if (timestamp) {
+        try {
+          const date = new Date(timestamp);
+          finalTimestamp = Math.floor(date.getTime() / 1000);
+        } catch {
+          finalTimestamp = Math.floor(Date.now() / 1000);
+        }
+      } else {
+        finalTimestamp = Math.floor(Date.now() / 1000);
+      }
+
+      let finalMetadata = "0x";
+      if (log.data && log.data !== "0x") {
+        try {
+          const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+          try {
+            const decoded = abiCoder.decode(
+              ["bytes", "bytes", "uint256", "uint256"],
+              log.data
+            );
+            finalMetadata = decoded[1];
+          } catch {
+            try {
+              const decoded = abiCoder.decode(
+                ["bytes", "uint256", "uint256"],
+                log.data
+              );
+              finalMetadata = decoded[0];
+            } catch {
+              if (transactionInput?.parameters) {
+                const metadataParam = transactionInput.parameters.find(
+                  (p) => p.name === "metadata"
+                );
+                if (metadataParam) {
+                  finalMetadata = metadataParam.value;
+                }
+              }
+            }
+          }
+        } catch {}
+      }
+
+      return {
+        sender,
+        stealthAddress: stealthAddressStr,
+        ephemeralPublicKey: ephemeralPublicKey,
+        metadata: finalMetadata,
+        blockNumber: blockNumberFromEvent,
+        timestamp: finalTimestamp,
+        transactionHash: transactionHash,
+      };
+    }
+
+    const decodedLogResult = decodedLog as ethers.Result;
+
+    const sender = decodedLogResult.sender;
+    const stealthAddressBytes32 = decodedLogResult.stealthAddress;
+    const ephemeralPublicKey = decodedLogResult.ephemeralPublicKey;
+    const metadata = decodedLogResult.metadata;
+    const blockNumberFromEvent = decodedLogResult.blockNumber
+      ? Number(decodedLogResult.blockNumber)
+      : blockNumber;
+    let timestampFromEvent: number;
+    if (timestamp) {
+      try {
+        const date = new Date(timestamp);
+        timestampFromEvent = Math.floor(date.getTime() / 1000);
+      } catch {
+        timestampFromEvent = Math.floor(Date.now() / 1000);
+      }
+    } else {
+      timestampFromEvent = Math.floor(Date.now() / 1000);
+    }
+
+    const stealthAddressStr = ethers.getAddress(
+      ethers.dataSlice(stealthAddressBytes32, 0, 20)
+    );
+
+    return {
+      sender: ethers.getAddress(sender),
+      stealthAddress: stealthAddressStr,
+      ephemeralPublicKey: ephemeralPublicKey,
+      metadata: metadata,
+      blockNumber: blockNumberFromEvent,
+      timestamp: timestampFromEvent,
+      transactionHash: transactionHash,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function scanForIncomingTransfers(
+  provider: ethers.Provider,
+  viewingKeyPrivate: string
+): Promise<AnnouncementEvent[]> {
+  try {
+    const transactions =
+      await fetchTransactionsFromBlockscout(ANNOUNCEMENT_ADDRESS);
+
+    const matchingEvents: AnnouncementEvent[] = [];
+
+    for (const tx of transactions) {
+      const blockNumber = tx.block_number;
+      const timestamp = tx.timestamp;
+
+      if (!tx.logs || tx.logs.length === 0) {
+        continue;
+      }
+
+      for (const log of tx.logs) {
+        const logAddress =
+          typeof log.address === "string"
+            ? log.address
+            : log.address?.hash || "";
+
+        if (logAddress.toLowerCase() !== ANNOUNCEMENT_ADDRESS.toLowerCase()) {
+          continue;
+        }
+
+        const event = decodeAnnouncementEvent(
+          log,
+          tx.hash,
+          blockNumber,
+          timestamp,
+          tx.decoded_input
+        );
+
+        if (!event) {
+          continue;
+        }
+
+        const computedStealthAddress = computeStealthAddress(
+          viewingKeyPrivate,
+          event.ephemeralPublicKey
+        );
+
+        const matchesEvent =
+          computedStealthAddress.toLowerCase() ===
+          event.stealthAddress.toLowerCase();
+        const matchesSender =
+          computedStealthAddress.toLowerCase() === event.sender.toLowerCase();
+
+        if (matchesEvent || matchesSender) {
+          matchingEvents.push({
+            ...event,
+            stealthAddress: computedStealthAddress,
+          });
+        }
+      }
+    }
+
+    return matchingEvents;
+  } catch {
+    return [];
+  }
+}
+
 export function parseMetadata(metadata: string): ParsedMetadata {
   try {
-    // Try to decode as JSON first
     if (metadata.startsWith("0x")) {
-      // If it's hex, try to decode as UTF-8
       try {
         const decoded = ethers.toUtf8String(metadata);
         return JSON.parse(decoded);
       } catch {
-        // If UTF-8 decode fails, return raw metadata
         return { message: metadata };
       }
     }
 
-    // Try parsing as JSON string
     return JSON.parse(metadata);
   } catch {
-    // If parsing fails, return as message
     return { message: metadata };
   }
 }
 
-/**
- * Announce a stealth address transaction
- * Called by sender when sending a private transfer
- * @param signer - Wallet signer
- * @param stealthAddress - Stealth address (as bytes32)
- * @param ephemeralPublicKey - Ephemeral public key (bytes)
- * @param metadata - Optional metadata (amount, token, etc.)
- * @returns Transaction receipt
- */
 export async function announceStealthAddress(
   signer: ethers.Signer,
   stealthAddress: string,
@@ -169,13 +467,11 @@ export async function announceStealthAddress(
       signer
     );
 
-    // Convert stealth address to bytes32
     const stealthAddressBytes32 = ethers.zeroPadValue(
       ethers.getBytes(stealthAddress),
       32
     );
 
-    // Convert ephemeral public key to bytes if needed
     const ephemeralKeyBytes = ethers.isHexString(ephemeralPublicKey)
       ? ephemeralPublicKey
       : ethers.toUtf8Bytes(ephemeralPublicKey);
@@ -194,15 +490,10 @@ export async function announceStealthAddress(
 
     return receipt;
   } catch (error) {
-    console.error("Error announcing stealth address:", error);
     throw error;
   }
 }
 
-/**
- * Get announcements for a specific stealth address
- * Note: This is less efficient than scanning with viewing key
- */
 export async function getAnnouncementsForAddress(
   provider: ethers.Provider,
   stealthAddress: string,
@@ -216,7 +507,6 @@ export async function getAnnouncementsForAddress(
       provider
     );
 
-    // Convert stealth address to bytes32
     const stealthAddressBytes32 = ethers.zeroPadValue(
       ethers.getBytes(stealthAddress),
       32
@@ -250,11 +540,10 @@ export async function getAnnouncementsForAddress(
         metadata: ann.metadata,
         blockNumber: Number(ann.blockNumber),
         timestamp: Number(ann.timestamp),
-        transactionHash: "", // Not available from this function
+        transactionHash: "",
       };
     });
   } catch (error) {
-    console.error("Error getting announcements:", error);
     throw error;
   }
 }

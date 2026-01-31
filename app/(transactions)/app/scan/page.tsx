@@ -69,8 +69,7 @@ export default function ScanPage() {
           () => {}
         );
         isScannerRunningRef.current = true;
-      } catch (err) {
-        console.error("Error starting camera:", err);
+      } catch {
         isScannerRunningRef.current = false;
       }
     };

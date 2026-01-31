@@ -1,16 +1,7 @@
-/**
- * Announcement Contract Interactions
- * Handles stealth address announcements
- */
-
 import { ethers } from "ethers";
 
 import { ANNOUNCEMENT_ADDRESS, ANNOUNCEMENT_ABI } from "@/lib/constants";
 
-/**
- * Announce a stealth address transaction
- * This is called by the sender when making a private transfer
- */
 export async function announceStealthTransaction(
   signer: ethers.Signer,
   stealthAddress: string,
@@ -29,12 +20,10 @@ export async function announceStealthTransaction(
       signer
     );
 
-    // Convert ephemeral public key to bytes
     const ephemeralKeyBytes = ethers.isHexString(ephemeralPublicKey)
       ? ephemeralPublicKey
       : ethers.toUtf8Bytes(ephemeralPublicKey);
 
-    // Encode metadata as JSON string, then to bytes (hex string format)
     const metadataBytes = metadata
       ? ethers.toUtf8Bytes(JSON.stringify(metadata))
       : "0x";
@@ -53,14 +42,10 @@ export async function announceStealthTransaction(
 
     return receipt;
   } catch (error) {
-    console.error("Error announcing stealth transaction:", error);
     throw error;
   }
 }
 
-/**
- * Listen for announcement events
- */
 export async function listenForAnnouncements(
   provider: ethers.Provider,
   callback: (

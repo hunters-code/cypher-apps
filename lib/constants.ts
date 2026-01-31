@@ -1,9 +1,3 @@
-/**
- * Smart Contract Addresses and ABIs
- * These are mock contracts for development - replace with actual addresses in production
- */
-
-// Contract Addresses (Base L2)
 export const REGISTRY_ADDRESS =
   process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
   "0x0000000000000000000000000000000000000000";
@@ -12,12 +6,9 @@ export const ANNOUNCEMENT_ADDRESS =
   process.env.NEXT_PUBLIC_ANNOUNCEMENT_ADDRESS ||
   "0x0000000000000000000000000000000000000000";
 
-// Base L2 Chain ID (8453 for mainnet, 84532 for sepolia testnet)
-export const BASE_CHAIN_ID = 84532; // Default to Sepolia testnet
+export const BASE_CHAIN_ID = 84532;
 
-// Registry Contract ABI
 export const REGISTRY_ABI = [
-  // Write Functions
   {
     name: "registerID",
     type: "function",
@@ -29,7 +20,6 @@ export const REGISTRY_ABI = [
     ],
     outputs: [],
   },
-  // Read Functions
   {
     name: "getViewingKey",
     type: "function",
@@ -58,7 +48,6 @@ export const REGISTRY_ABI = [
     inputs: [{ name: "username", type: "string" }],
     outputs: [{ name: "", type: "address" }],
   },
-  // Events
   {
     name: "IDRegistered",
     type: "event",
@@ -70,9 +59,7 @@ export const REGISTRY_ABI = [
   },
 ] as const;
 
-// Announcement Contract ABI
 export const ANNOUNCEMENT_ABI = [
-  // Write Functions
   {
     name: "announce",
     type: "function",
@@ -84,7 +71,6 @@ export const ANNOUNCEMENT_ABI = [
     ],
     outputs: [],
   },
-  // Read Functions
   {
     name: "getAnnouncements",
     type: "function",
@@ -109,7 +95,6 @@ export const ANNOUNCEMENT_ABI = [
       },
     ],
   },
-  // Events
   {
     name: "Announcement",
     type: "event",

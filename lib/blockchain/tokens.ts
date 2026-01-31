@@ -54,8 +54,7 @@ export async function getNativeBalance(
     const normalizedAddress = ethers.getAddress(address);
     const balance = await provider.getBalance(normalizedAddress);
     return ethers.formatEther(balance);
-  } catch (error) {
-    console.error("Error fetching native balance:", error);
+  } catch {
     return "0";
   }
 }
@@ -78,8 +77,7 @@ export async function getERC20Balance(
     const balance = await tokenContract.balanceOf(normalizedAddress);
 
     return ethers.formatUnits(balance, decimals);
-  } catch (error) {
-    console.error("Error fetching ERC20 balance:", error);
+  } catch {
     return "0";
   }
 }
@@ -119,16 +117,10 @@ export async function getMultipleTokenBalances(
 
 export async function getStealthAddresses(
   provider: ethers.Provider,
-  viewingKeyPrivate: string,
-  fromBlock: number = 0
+  viewingKeyPrivate: string
 ): Promise<string[]> {
   try {
-    const events = await scanForIncomingTransfers(
-      provider,
-      viewingKeyPrivate,
-      fromBlock,
-      "latest"
-    );
+    const events = await scanForIncomingTransfers(provider, viewingKeyPrivate);
 
     const stealthAddresses = new Set<string>();
     events.forEach((event) => {
@@ -136,16 +128,7 @@ export async function getStealthAddresses(
     });
 
     return Array.from(stealthAddresses);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (
-      errorMessage.includes("no backend is currently healthy") ||
-      errorMessage.includes("UNKNOWN_ERROR") ||
-      errorMessage.includes("could not coalesce error")
-    ) {
-      return [];
-    }
-    console.error("Error getting stealth addresses:", error);
+  } catch {
     return [];
   }
 }
@@ -178,12 +161,7 @@ export async function getTokenBalanceWithStealth(
         } else {
           totalBalance += ethers.parseUnits(balance, tokenInfo.decimals);
         }
-      } catch (error) {
-        console.error(
-          `Error fetching balance for stealth address ${stealthAddress}:`,
-          error
-        );
-      }
+      } catch {}
     })
   );
 
@@ -197,18 +175,13 @@ export async function getMultipleTokenBalancesWithStealth(
   provider: ethers.Provider,
   tokens: AvailableToken[],
   mainAddress: string,
-  viewingKeyPrivate: string | null,
-  fromBlock: number = 0
+  viewingKeyPrivate: string | null
 ): Promise<Record<string, string>> {
   const balances: Record<string, string> = {};
 
   let stealthAddresses: string[] = [];
   if (viewingKeyPrivate) {
-    stealthAddresses = await getStealthAddresses(
-      provider,
-      viewingKeyPrivate,
-      fromBlock
-    );
+    stealthAddresses = await getStealthAddresses(provider, viewingKeyPrivate);
   }
 
   await Promise.all(
@@ -226,30 +199,62 @@ export async function getMultipleTokenBalancesWithStealth(
   return balances;
 }
 
-/**
- * Send tokens (native or ERC20) to a recipient
- */
 export async function sendToken(
   signer: ethers.Signer,
   tokenInfo: TokenInfo,
   toAddress: string,
   amount: string
 ): Promise<ethers.TransactionReceipt | null> {
+  const provider = signer.provider;
+  if (!provider) {
+    throw new Error("Provider not available");
+  }
+
+  const signerAddress = await signer.getAddress();
+  const ethBalance = await provider.getBalance(signerAddress);
+
   if (tokenInfo.address === "native") {
-    // Send native ETH
+    const amountInWei = ethers.parseEther(amount);
+    const estimatedGas = await provider.estimateGas({
+      from: signerAddress,
+      to: toAddress,
+      value: amountInWei,
+    });
+    const gasPrice = await provider.getFeeData();
+    const gasCost = estimatedGas * (gasPrice.gasPrice || BigInt(0));
+
+    if (ethBalance < amountInWei + gasCost) {
+      throw new Error(
+        `Insufficient ETH balance. Need ${ethers.formatEther(amountInWei + gasCost)} ETH (${ethers.formatEther(amountInWei)} for transfer + ${ethers.formatEther(gasCost)} for gas), but have ${ethers.formatEther(ethBalance)} ETH`
+      );
+    }
+
     const tx = await signer.sendTransaction({
       to: toAddress,
-      value: ethers.parseEther(amount),
+      value: amountInWei,
     });
     return await tx.wait();
   } else {
-    // Send ERC20 token
     const tokenContract = new ethers.Contract(
       tokenInfo.address,
       ERC20_ABI,
       signer
     );
     const amountInWei = ethers.parseUnits(amount, tokenInfo.decimals);
+
+    const estimatedGas = await tokenContract.transfer.estimateGas(
+      toAddress,
+      amountInWei
+    );
+    const gasPrice = await provider.getFeeData();
+    const gasCost = estimatedGas * (gasPrice.gasPrice || BigInt(0));
+
+    if (ethBalance < gasCost) {
+      throw new Error(
+        `Insufficient ETH for gas. Need ${ethers.formatEther(gasCost)} ETH for gas fee, but have ${ethers.formatEther(ethBalance)} ETH. Please add ETH to your wallet to pay for transaction fees.`
+      );
+    }
+
     const tx = await tokenContract.transfer(toAddress, amountInWei);
     return await tx.wait();
   }
