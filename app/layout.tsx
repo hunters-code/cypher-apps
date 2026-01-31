@@ -78,6 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const appUrl =
     process.env.NEXT_PUBLIC_URL || "https://cypher-apps.vercel.app";
   const appName = "Cypher: Your crypto, truly private";
+  const previewImageUrl = `${appUrl}/Cypher-Preview-1.jpg`;
   const logoUrl = `${appUrl}/cypher-logo-mini.svg`;
 
   return {
@@ -97,6 +98,12 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: appName,
       images: [
         {
+          url: previewImageUrl,
+          width: 1200,
+          height: 630,
+          alt: "Cypher Wallet Preview",
+        },
+        {
           url: logoUrl,
           width: 160,
           height: 160,
@@ -107,24 +114,24 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: appName,
       description:
         "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
-      images: [logoUrl],
+      images: [previewImageUrl],
     },
     other: {
       "base:app_id": "6952106ac63ad876c90817b6",
       "fc:miniapp": JSON.stringify({
         version: "next",
-        imageUrl: `${appUrl}/embed-image.png`,
+        imageUrl: previewImageUrl,
         button: {
           title: `Launch ${appName}`,
           action: {
             type: "launch_miniapp",
             name: appName,
             url: appUrl,
-            splashImageUrl: `${appUrl}/splash-image.png`,
+            splashImageUrl: previewImageUrl,
             splashBackgroundColor: "#000000",
           },
         },

@@ -1,13 +1,27 @@
+"use client";
+
+import { useMemo } from "react";
+
 import Link from "next/link";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { ChevronDownIcon, CircleQuestionMarkIcon } from "lucide-react";
 
 import AnimatedContent from "@/components/landing/animated-content";
 import SectionTitle from "@/components/landing/section-title";
 import { landingFaqs } from "@/data/landing/faqs";
 import { ROUTES } from "@/lib/constants/routes";
+import { hasSession } from "@/lib/utils/session";
 
 export default function FaqSection() {
+  const { authenticated, ready } = usePrivy();
+
+  const appLink = useMemo(() => {
+    if (ready && authenticated && hasSession()) {
+      return ROUTES.DASHBOARD;
+    }
+    return ROUTES.LOGIN;
+  }, [ready, authenticated]);
   return (
     <section className="border-y border-border">
       <div className="px-4 md:px-16 lg:px-24 xl:px-32">
@@ -48,10 +62,10 @@ export default function FaqSection() {
                 Still have questions? We can help you get started.
               </h3>
               <Link
-                href={ROUTES.LOGIN}
+                href={appLink}
                 className="shrink-0 rounded-xl bg-primary-foreground px-5 py-2.5 font-medium text-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] hover:opacity-95"
               >
-                Get Started
+                Go to App
               </Link>
             </div>
           </div>

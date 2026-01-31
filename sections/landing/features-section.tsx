@@ -1,13 +1,27 @@
+"use client";
+
+import { useMemo } from "react";
+
 import Link from "next/link";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { ArrowUpRightIcon, SparkleIcon } from "lucide-react";
 
 import AnimatedContent from "@/components/landing/animated-content";
 import SectionTitle from "@/components/landing/section-title";
 import { landingFeatures } from "@/data/landing/features";
 import { ROUTES } from "@/lib/constants/routes";
+import { hasSession } from "@/lib/utils/session";
 
 export default function FeaturesSection() {
+  const { authenticated, ready } = usePrivy();
+
+  const appLink = useMemo(() => {
+    if (ready && authenticated && hasSession()) {
+      return ROUTES.DASHBOARD;
+    }
+    return ROUTES.LOGIN;
+  }, [ready, authenticated]);
   return (
     <section id="features" className="px-4 md:px-16 lg:px-24 xl:px-32">
       <div className="mx-auto grid max-w-7xl grid-cols-1 border-x border-border md:grid-cols-2 md:divide-x md:divide-border">
@@ -24,10 +38,10 @@ export default function FeaturesSection() {
                 Trusted by users who want cash-level privacy on the blockchain.
               </p>
               <Link
-                href={ROUTES.LOGIN}
+                href={appLink}
                 className="mt-6 flex w-max items-center gap-1 rounded-xl bg-brand-foreground px-5 py-2.5 text-brand font-medium shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] hover:opacity-95"
               >
-                Get started
+                Go to App
                 <ArrowUpRightIcon size={20} />
               </Link>
             </AnimatedContent>
