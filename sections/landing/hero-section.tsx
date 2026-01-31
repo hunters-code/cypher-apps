@@ -149,7 +149,7 @@ export default function HeroSection() {
                 }}
                 placeholder="your-username"
                 autoComplete="username"
-                className="h-12 w-full rounded-xl border border-border bg-muted pl-[7.5rem] pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                className="h-12 w-full rounded-xl border border-border bg-muted pl-30 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                 aria-invalid={!!error}
                 aria-describedby={error ? "claim-username-error" : undefined}
               />

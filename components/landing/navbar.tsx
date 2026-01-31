@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -24,8 +23,8 @@ export default function LandingNavbar() {
 
   return (
     <>
-      <AnimatedContent reverse>
-        <nav className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/95 px-4 py-4 transition-all duration-300 backdrop-blur md:px-16 lg:px-24 xl:px-32">
+      <nav className="sticky top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/5 backdrop-blur-xl backdrop-saturate-150 px-4 py-4 transition-all duration-300 md:px-16 lg:px-24 xl:px-32">
+        <AnimatedContent reverse>
           <div className="mx-auto flex max-w-7xl items-center justify-between">
             <Link href="/">
               <div className="flex items-center gap-4">
@@ -64,19 +63,16 @@ export default function LandingNavbar() {
               Get Started
             </Link>
           </div>
-        </nav>
-      </AnimatedContent>
+        </AnimatedContent>
+      </nav>
       <div
-        className={`fixed right-0 top-0 z-[60] w-full overflow-hidden bg-white shadow-xl shadow-black/5 transition-all duration-300 ease-in-out ${isMenuOpen ? "h-[23rem]" : "h-0"}`}
+        className={`fixed right-0 top-0 z-[60] w-full overflow-hidden bg-white/10 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 shadow-xl shadow-black/5 transition-all duration-300 ease-in-out ${isMenuOpen ? "h-[23rem]" : "h-0"}`}
       >
         <div className="flex items-center justify-between p-4">
-          <Image
-            src="/cypher-logo-mini.svg"
-            alt="Cypher Logo"
-            width={135}
-            height={135}
-            className="h-9 w-auto"
-          />
+          <div className="flex items-center gap-4">
+            <Logo />
+            <span className="text-xl font-bold text-foreground">Cypher</span>
+          </div>
           <button
             type="button"
             onClick={() => setIsMenuOpen(false)}
