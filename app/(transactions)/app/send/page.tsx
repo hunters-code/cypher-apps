@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { QrCode, Lock, Loader2, Check, X } from "lucide-react";
+import { QrCode, Loader2, Check, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ export default function SendPage() {
 
   const [recipient, setRecipient] = useState(initialRecipient);
   const [amount, setAmount] = useState("");
-  const [isPrivate, setIsPrivate] = useState(true);
+  const [isPrivate] = useState(true);
   const [token, setToken] = useState<"ETH" | "CDT">(
     (initialToken as "ETH" | "CDT") || "ETH"
   );
@@ -139,10 +140,6 @@ export default function SendPage() {
     router.push(`${ROUTES.SEND_CONFIRM}?${params.toString()}`);
   };
 
-  const handleBack = () => {
-    router.push(ROUTES.DASHBOARD);
-  };
-
   useEffect(() => {
     if (ready && (!authenticated || !hasSession())) {
       router.push(ROUTES.LOGIN);
@@ -154,183 +151,153 @@ export default function SendPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
-      <div className="flex flex-col gap-6 w-full">
-        <div>
-          <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
-            Send
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground md:text-base">
-            Send crypto privately to any username or address.
-          </p>
-        </div>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
+      <div>
+        <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
+          Send
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground md:text-base">
+          Send crypto privately to any username or address.
+        </p>
+      </div>
 
-        <div className="space-y-6 w-full">
-          <div className="space-y-2">
-            <Label htmlFor="recipient" className="text-foreground">
-              To
-            </Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                  @
-                </span>
-                <Input
-                  id="recipient"
-                  type="text"
-                  placeholder="username"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-              <Button variant="outline" size="icon">
+      <div className="space-y-6 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
+        <div className="space-y-2">
+          <Label htmlFor="recipient" className="text-foreground font-medium">
+            To
+          </Label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                @
+              </span>
+              <Input
+                id="recipient"
+                type="text"
+                placeholder="username"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Link href={ROUTES.SCAN}>
+              <Button
+                variant="outline"
+                size="icon"
+                type="button"
+                aria-label="Scan QR code"
+              >
                 <QrCode className="h-4 w-4" />
               </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground text-left">
-                Send to username or paste address
-              </p>
-              {recipient.trim() && (
-                <div className="flex items-center gap-2 text-xs">
-                  {isValidatingRecipient || isChecking ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                      <span className="text-muted-foreground">Checking...</span>
-                    </>
-                  ) : recipientValid === true ? (
-                    <>
-                      <Check className="h-3 w-3 text-primary" />
-                      <span className="text-primary">Valid</span>
-                    </>
-                  ) : recipientValid === false ? (
-                    <>
-                      <X className="h-3 w-3 text-destructive" />
-                      <span className="text-destructive">
-                        {recipientError || "Invalid"}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-              )}
-            </div>
+            </Link>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="amount" className="text-foreground">
-              Amount
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="amount"
-                type="number"
-                placeholder="1.5"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="flex-1"
-                min={0}
-              />
-              <div className="flex gap-1">
-                <Button
-                  variant={token === "ETH" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setToken("ETH")}
-                >
-                  ETH
-                </Button>
-                <Button
-                  variant={token === "CDT" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setToken("CDT")}
-                >
-                  CDT
-                </Button>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground text-left">
+              Send to username or paste address
+            </p>
+            {recipient.trim() && (
+              <div className="flex items-center gap-2 text-xs">
+                {isValidatingRecipient || isChecking ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    <span className="text-muted-foreground">Checking...</span>
+                  </>
+                ) : recipientValid === true ? (
+                  <>
+                    <Check className="h-3 w-3 text-primary" />
+                    <span className="text-primary">Valid</span>
+                  </>
+                ) : recipientValid === false ? (
+                  <>
+                    <X className="h-3 w-3 text-destructive" />
+                    <span className="text-destructive">
+                      {recipientError || "Invalid"}
+                    </span>
+                  </>
+                ) : null}
               </div>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                {amount
-                  ? `≈ $${(parseFloat(amount) * (token === "CDT" ? 0.1 : 1790)).toFixed(2)} USD`
-                  : "≈ $0.00 USD"}
-              </span>
-              <span>
-                Balance:{" "}
-                {balancesLoading
-                  ? "Loading..."
-                  : balanceAmount
-                    ? `${formatCryptoAmount(balanceAmount, 4)} ${token}`
-                    : `0 ${token}`}
-              </span>
-            </div>
-            {balanceError && (
-              <p className="text-xs text-destructive text-right">
-                {balanceError}
-              </p>
             )}
           </div>
+        </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAmount((balanceAmount * 0.25).toFixed(4))}
-              disabled={balancesLoading || balanceAmount === 0}
-            >
-              25%
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAmount((balanceAmount * 0.5).toFixed(4))}
-              disabled={balancesLoading || balanceAmount === 0}
-            >
-              50%
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAmount(balanceAmount.toFixed(4))}
-              disabled={balancesLoading || balanceAmount === 0}
-            >
-              Max
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between rounded-xl border border-border p-4">
-              <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-muted-foreground" />
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="privacy"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Privacy Mode
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Transfer will use stealth address
-                  </p>
-                </div>
-              </div>
+        <div className="space-y-2">
+          <Label htmlFor="amount" className="text-foreground font-medium">
+            Amount
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="amount"
+              type="number"
+              placeholder="1.5"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="flex-1"
+              min={0}
+            />
+            <div className="flex gap-1">
               <Button
-                variant={isPrivate ? "default" : "outline"}
+                variant={token === "ETH" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setIsPrivate(!isPrivate)}
+                onClick={() => setToken("ETH")}
               >
-                {isPrivate ? "ON" : "OFF"}
+                ETH
+              </Button>
+              <Button
+                variant={token === "CDT" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setToken("CDT")}
+              >
+                CDT
               </Button>
             </div>
           </div>
-
-          <div className="rounded-xl bg-muted/50 p-4">
-            <p className="text-xs text-muted-foreground">
-              Estimated Fee:{" "}
-              {token === "CDT"
-                ? "~0.0001 ETH (gas fee)"
-                : "~0.0002 ETH ($0.36)"}
-            </p>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              {amount
+                ? `≈ $${(parseFloat(amount) * (token === "CDT" ? 0.1 : 1790)).toFixed(2)} USD`
+                : "≈ $0.00 USD"}
+            </span>
+            <span>
+              Balance:{" "}
+              {balancesLoading
+                ? "Loading..."
+                : balanceAmount
+                  ? `${formatCryptoAmount(balanceAmount, 4)} ${token}`
+                  : `0 ${token}`}
+            </span>
           </div>
+          {balanceError && (
+            <p className="text-xs text-destructive text-right">
+              {balanceError}
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAmount((balanceAmount * 0.25).toFixed(4))}
+            disabled={balancesLoading || balanceAmount === 0}
+          >
+            25%
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAmount((balanceAmount * 0.5).toFixed(4))}
+            disabled={balancesLoading || balanceAmount === 0}
+          >
+            50%
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAmount(balanceAmount.toFixed(4))}
+            disabled={balancesLoading || balanceAmount === 0}
+          >
+            Max
+          </Button>
         </div>
       </div>
 
@@ -350,9 +317,6 @@ export default function SendPage() {
           onClick={handleContinue}
         >
           Continue
-        </Button>
-        <Button variant="outline" className="w-full" onClick={handleBack}>
-          Back
         </Button>
       </div>
     </div>

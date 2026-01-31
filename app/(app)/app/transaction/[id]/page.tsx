@@ -159,10 +159,6 @@ export default function TransactionDetailPage() {
     );
   };
 
-  const handleBack = () => {
-    router.push(ROUTES.HISTORY);
-  };
-
   const getStatusIcon = () => {
     switch (transaction.status) {
       case "CONFIRMED":
@@ -345,14 +341,6 @@ export default function TransactionDetailPage() {
           >
             <ExternalLink className="mr-2 h-4 w-4" />
             View on BaseScan
-          </Button>
-        </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-5xl shrink-0 border-t border-border bg-background px-4 py-4">
-        <div className="flex flex-col gap-3">
-          <Button variant="outline" className="w-full" onClick={handleBack}>
-            Back
           </Button>
         </div>
       </div>

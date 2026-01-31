@@ -145,6 +145,7 @@
 
 #reader {
   position: relative;
+  min-height: 300px;
 }
 
 #reader video {

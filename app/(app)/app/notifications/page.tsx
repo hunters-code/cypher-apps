@@ -130,10 +130,6 @@ export default function NotificationsPage() {
     return notifications.filter((n) => !n.isRead).length;
   }, [notifications]);
 
-  const handleBack = () => {
-    router.push(ROUTES.DASHBOARD);
-  };
-
   const handleMarkAsRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
@@ -274,14 +270,6 @@ export default function NotificationsPage() {
               )}
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-5xl shrink-0 border-t border-border bg-background px-4 py-4">
-        <div className="flex flex-col gap-3">
-          <Button variant="outline" className="w-full" onClick={handleBack}>
-            Back
-          </Button>
         </div>
       </div>
     </div>
