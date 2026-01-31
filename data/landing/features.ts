@@ -15,8 +15,8 @@ export const landingFeatures: LandingFeature[] = [
     description:
       "Send to usernames without exposing wallet addresses. Recipients get funds to a one-time stealth address only they can derive.",
     icon: UserCircleIcon,
-    cardBg: "bg-orange-100",
-    iconBg: "bg-orange-500",
+    cardBg: "bg-brand-muted",
+    iconBg: "bg-brand",
   },
   {
     title: "Private Balances",
@@ -55,7 +55,7 @@ export const landingFeatures: LandingFeature[] = [
     description:
       "Familiar send, receive, and scan flows with QR and usernames—privacy without complexity.",
     icon: WalletIcon,
-    cardBg: "bg-gray-50",
-    iconBg: "bg-orange-500",
+    cardBg: "bg-muted",
+    iconBg: "bg-brand",
   },
 ];

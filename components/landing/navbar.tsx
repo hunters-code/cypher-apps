@@ -24,7 +24,7 @@ export default function LandingNavbar() {
   return (
     <>
       <AnimatedContent reverse>
-        <nav className="fixed left-0 right-0 top-0 z-50 border-b border-neutral-300 bg-white/95 px-4 py-4 transition-all duration-300 backdrop-blur md:px-16 lg:px-24 xl:px-32">
+        <nav className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/95 px-4 py-4 transition-all duration-300 backdrop-blur md:px-16 lg:px-24 xl:px-32">
           <div className="mx-auto flex max-w-7xl items-center justify-between">
             <Link href="/">
               <Image
@@ -40,7 +40,7 @@ export default function LandingNavbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="px-3 py-1 text-gray-800 hover:text-zinc-500"
+                  className="px-3 py-1 text-foreground hover:text-muted-foreground"
                 >
                   {link.name}
                 </Link>
@@ -58,7 +58,7 @@ export default function LandingNavbar() {
 
             <Link
               href={ROUTES.LOGIN}
-              className="hidden rounded-full bg-orange-500 px-6 py-2.5 text-white shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)] md:inline-block"
+              className="hidden rounded-full bg-brand px-6 py-2.5 text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] md:inline-block"
             >
               Get Started
             </Link>
@@ -96,7 +96,7 @@ export default function LandingNavbar() {
           ))}
           <Link
             href={ROUTES.LOGIN}
-            className="w-max rounded-full bg-gradient-to-tl from-orange-600 to-orange-500 px-6 py-2.5 text-sm text-white shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)]"
+            className="w-max rounded-full bg-brand px-6 py-2.5 text-sm text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)]"
             onClick={() => setIsMenuOpen(false)}
           >
             Get Started

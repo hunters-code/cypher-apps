@@ -10,7 +10,7 @@ import { ROUTES } from "@/lib/constants/routes";
 export default function FeaturesSection() {
   return (
     <section id="features" className="px-4 md:px-16 lg:px-24 xl:px-32">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 border-x border-gray-200 md:grid-cols-2 md:divide-x md:divide-gray-200">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 border-x border-border md:grid-cols-2 md:divide-x md:divide-border">
         <div>
           <div className="flex flex-col items-start p-4 pt-16 md:sticky md:top-[6.5rem] md:p-16">
             <SectionTitle
@@ -19,13 +19,13 @@ export default function FeaturesSection() {
               title="Core features"
               subtitle="Everything you need for private crypto—stealth addresses, usernames, and on-chain privacy without exposing your activity."
             />
-            <AnimatedContent className="mt-12 w-full rounded-xl bg-orange-500 p-4 md:p-6">
-              <p className="text-lg text-white">
+            <AnimatedContent className="mt-12 w-full rounded-xl bg-brand p-4 md:p-6">
+              <p className="text-lg text-brand-foreground">
                 Trusted by users who want cash-level privacy on the blockchain.
               </p>
               <Link
                 href={ROUTES.LOGIN}
-                className="mt-6 flex w-max items-center gap-1 rounded-full bg-white px-5 py-2 hover:bg-gray-100"
+                className="mt-6 flex w-max items-center gap-1 rounded-full bg-brand-foreground px-5 py-2 text-brand hover:bg-brand-foreground/90"
               >
                 Get started
                 <ArrowUpRightIcon size={20} />
@@ -37,15 +37,15 @@ export default function FeaturesSection() {
           {landingFeatures.map((feature, index) => (
             <AnimatedContent
               key={index}
-              className={`${feature.cardBg ?? "bg-gray-50"} flex w-full flex-col items-start rounded-xl p-6 md:sticky md:top-[6.5rem]`}
+              className={`${feature.cardBg ?? "bg-muted"} flex w-full flex-col items-start rounded-xl p-6 md:sticky md:top-[6.5rem]`}
             >
               <div
-                className={`${feature.iconBg ?? "bg-orange-500"} rounded-md p-2 text-white`}
+                className={`${feature.iconBg ?? "bg-brand"} rounded-md p-2 text-brand-foreground`}
               >
                 <feature.icon size={24} />
               </div>
               <p className="mt-4 text-base font-medium">{feature.title}</p>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {feature.description}
               </p>
             </AnimatedContent>

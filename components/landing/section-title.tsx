@@ -19,7 +19,7 @@ export default function SectionTitle({
       </AnimatedContent>
       <AnimatedContent>
         <p
-          className={`text-base leading-7 text-zinc-500 ${dir === "center" ? "text-center max-w-lg" : "md:text-left text-center max-w-sm"}`}
+          className={`text-base leading-7 text-muted-foreground ${dir === "center" ? "text-center max-w-lg" : "md:text-left text-center max-w-sm"}`}
         >
           {subtitle}
         </p>

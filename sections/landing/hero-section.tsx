@@ -108,7 +108,7 @@ export default function HeroSection() {
           <span>Cash-level privacy on-chain</span>
           <div className="mx-1 h-5 w-px rounded-full bg-white" />
           <div className="flex items-center gap-1 pr-3">
-            <StarIcon className="size-4.5 fill-orange-500 stroke-orange-500" />
+            <StarIcon className="size-4.5 fill-brand stroke-brand" />
             <span>Secure</span>
           </div>
         </AnimatedContent>
@@ -121,7 +121,7 @@ export default function HeroSection() {
           </div>
         </AnimatedContent>
         <AnimatedContent distance={30} delay={0.2}>
-          <p className="mt-4 max-w-lg text-center text-base leading-7 text-zinc-500">
+          <p className="mt-4 max-w-lg text-center text-base leading-7 text-muted-foreground">
             Everything you need to receive payments easily without exposing your
             wallet.
           </p>
@@ -137,7 +137,7 @@ export default function HeroSection() {
             className="flex w-full flex-col gap-3"
           >
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none text-sm">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none text-sm">
                 cypher.app/
               </span>
               <input
@@ -149,7 +149,7 @@ export default function HeroSection() {
                 }}
                 placeholder="your-username"
                 autoComplete="username"
-                className="h-12 w-full rounded-xl border border-gray-200 bg-gray-100 pl-[7.5rem] pr-4 text-base text-gray-800 placeholder:text-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="h-12 w-full rounded-xl border border-border bg-muted pl-[7.5rem] pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                 aria-invalid={!!error}
                 aria-describedby={error ? "claim-username-error" : undefined}
               />
@@ -171,8 +171,8 @@ export default function HeroSection() {
               >
                 {isChecking && (
                   <>
-                    <Loader2 className="size-4 shrink-0 animate-spin text-gray-500" />
-                    <span className="text-gray-500">
+                    <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />
+                    <span className="text-muted-foreground">
                       Checking availability...
                     </span>
                   </>
@@ -181,8 +181,10 @@ export default function HeroSection() {
                   lastCheckedFor === cleanUsername &&
                   availability === true && (
                     <>
-                      <CheckCircle2 className="size-4 shrink-0 text-green-600" />
-                      <span className="text-green-600">Username available</span>
+                      <CheckCircle2 className="size-4 shrink-0 text-green-600 dark:text-green-400" />
+                      <span className="text-green-600 dark:text-green-400">
+                        Username available
+                      </span>
                     </>
                   )}
                 {!isChecking &&
@@ -200,7 +202,7 @@ export default function HeroSection() {
             <button
               type="submit"
               disabled={isButtonDisabled}
-              className="h-12 w-full rounded-xl bg-gradient-to-tl from-orange-600 to-orange-500 font-semibold text-white shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-12 w-full rounded-xl bg-brand font-semibold text-brand-foreground shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)] transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Claim My Username
             </button>
@@ -210,7 +212,7 @@ export default function HeroSection() {
         <AnimatedContent className="mt-6 flex w-full flex-col items-center gap-4 md:w-auto md:flex-row">
           <Link
             href="#features"
-            className="relative w-full rounded-full border border-white bg-white/50 px-8 py-3 text-center font-medium text-gray-600 md:w-auto md:py-2.5"
+            className="relative w-full rounded-full border border-white bg-white/50 px-8 py-3 text-center font-medium text-muted-foreground md:w-auto md:py-2.5"
           >
             See how it works
             <AnimatedContent
