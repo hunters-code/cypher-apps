@@ -70,7 +70,7 @@ export default function ReceivePage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
         <div className="flex flex-col gap-1">
           <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
             Receive

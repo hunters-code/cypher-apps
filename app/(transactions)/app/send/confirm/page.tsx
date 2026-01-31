@@ -150,7 +150,7 @@ function SendConfirmContent() {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-4xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
       <div className="flex flex-col items-center gap-8 text-center w-full">
         <h1 className="text-3xl font-bold text-foreground text-left w-full">
           Confirm Transaction
@@ -252,7 +252,7 @@ export default function SendConfirmPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center gap-4 px-4 py-8">
+        <div className="mx-auto flex h-full w-full max-w-5xl flex-col items-center justify-center gap-4 px-4 py-8">
           <div className="text-muted-foreground">Loading...</div>
         </div>
       }
