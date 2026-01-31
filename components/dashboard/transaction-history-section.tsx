@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
-
-import { FileDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
 import type { RecentActivity } from "@/components/transaction/RecentActivityList";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils";
 
 type TabId = "all" | "incoming" | "outgoing";
@@ -43,16 +40,6 @@ export function TransactionHistorySection({
           Transaction History
         </h2>
         <div className="flex items-center gap-2">
-          <Link href={ROUTES.HISTORY}>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 border-border text-muted-foreground hover:text-foreground"
-            >
-              <FileDown className="h-4 w-4" />
-              Export CSV
-            </Button>
-          </Link>
           <Button
             variant="ghost"
             size="icon-sm"
