@@ -13,6 +13,7 @@ import { ROUTES } from "@/lib/constants/routes";
 import type { LandingLink } from "@/types/landing";
 
 import AnimatedContent from "./animated-content";
+import { Logo } from "../shared/logo";
 
 export default function LandingNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,12 +28,12 @@ export default function LandingNavbar() {
         <nav className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/95 px-4 py-4 transition-all duration-300 backdrop-blur md:px-16 lg:px-24 xl:px-32">
           <div className="mx-auto flex max-w-7xl items-center justify-between">
             <Link href="/">
-              <Image
-                src="/assets/logo.svg"
-                alt="Cypher Logo"
-                width={135}
-                height={36}
-              />
+              <div className="flex items-center gap-4">
+                <Logo />
+                <span className="text-xl font-bold text-foreground">
+                  Cypher
+                </span>
+              </div>
             </Link>
 
             <div className="hidden md:flex md:gap-3">
@@ -70,10 +71,11 @@ export default function LandingNavbar() {
       >
         <div className="flex items-center justify-between p-4">
           <Image
-            src="/assets/logo.svg"
+            src="/cypher-logo-mini.svg"
             alt="Cypher Logo"
             width={135}
-            height={36}
+            height={135}
+            className="h-9 w-auto"
           />
           <button
             type="button"

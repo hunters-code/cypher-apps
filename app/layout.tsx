@@ -76,12 +76,42 @@ const urbanist = Urbanist({
 export async function generateMetadata(): Promise<Metadata> {
   const appUrl =
     process.env.NEXT_PUBLIC_URL || "https://cypher-apps.vercel.app";
-  const appName = "Cypher Wallet";
+  const appName = "Cypher: Your crypto, truly private";
+  const logoUrl = `${appUrl}/cypher-logo-mini.svg`;
 
   return {
     title: appName,
     description:
       "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
+    icons: {
+      icon: "/icon.svg",
+      shortcut: "/icon.svg",
+      apple: "/icon.svg",
+    },
+    openGraph: {
+      title: appName,
+      description:
+        "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
+      url: appUrl,
+      siteName: appName,
+      images: [
+        {
+          url: logoUrl,
+          width: 160,
+          height: 160,
+          alt: "Cypher Wallet Logo",
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: appName,
+      description:
+        "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
+      images: [logoUrl],
+    },
     other: {
       "base:app_id": "6952106ac63ad876c90817b6",
       "fc:miniapp": JSON.stringify({
