@@ -2,30 +2,34 @@
 
 import { useState } from "react";
 
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Loader2 } from "lucide-react";
 
 import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
-import type { RecentActivity } from "@/components/transaction/RecentActivityList";
 import { Button } from "@/components/ui/button";
+import type { Transaction } from "@/hooks/useTransactionHistory";
 import { cn } from "@/lib/utils";
 
 type TabId = "all" | "incoming" | "outgoing";
 
 interface TransactionHistorySectionProps {
-  activities: RecentActivity[];
+  transactions: Transaction[];
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 export function TransactionHistorySection({
-  activities,
+  transactions,
+  isLoading = false,
+  error = null,
 }: TransactionHistorySectionProps) {
   const [activeTab, setActiveTab] = useState<TabId>("all");
 
   const filtered =
     activeTab === "all"
-      ? activities
+      ? transactions
       : activeTab === "incoming"
-        ? activities.filter((a) => a.type === "RECEIVE")
-        : activities.filter((a) => a.type === "SEND");
+        ? transactions.filter((a) => a.type === "RECEIVE")
+        : transactions.filter((a) => a.type === "SEND");
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "all", label: "All" },
@@ -70,20 +74,29 @@ export function TransactionHistorySection({
       </div>
 
       <div className="space-y-2">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="rounded-xl border border-border bg-muted/20 py-8 text-center text-sm text-muted-foreground">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="mt-2">Loading transactions...</p>
+          </div>
+        ) : error ? (
+          <div className="rounded-xl border border-border bg-destructive/10 py-8 text-center text-sm text-destructive">
+            {error}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="rounded-xl border border-border bg-muted/20 py-8 text-center text-sm text-muted-foreground">
             No transactions yet
           </div>
         ) : (
-          filtered.map((activity) => (
+          filtered.map((transaction) => (
             <RecentActivityItem
-              key={activity.id}
-              type={activity.type}
-              username={activity.username}
-              amount={activity.amount}
-              token={activity.token}
-              timestamp={activity.timestamp}
-              isPrivate={activity.isPrivate}
+              key={transaction.id}
+              type={transaction.type}
+              username={transaction.username}
+              amount={transaction.amount}
+              token={transaction.token}
+              timestamp={transaction.timestamp}
+              isPrivate={transaction.isPrivate}
             />
           ))
         )}

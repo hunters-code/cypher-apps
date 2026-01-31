@@ -3,33 +3,18 @@
 import { PersonalLinkCard } from "@/components/dashboard/personal-link-card";
 import { StealthBalancesCard } from "@/components/dashboard/stealth-balances-card";
 import { TransactionHistorySection } from "@/components/dashboard/transaction-history-section";
+import { useTransactionHistory } from "@/hooks/useTransactionHistory";
 
 import { useDashboard } from "./useDashboard";
-
-const SAMPLE_ACTIVITIES = [
-  {
-    id: "1",
-    type: "SEND" as const,
-    username: "nashirjamali",
-    amount: "1.0",
-    token: "CDT",
-    timestamp: "2025-01-01",
-    isPrivate: false,
-  },
-  {
-    id: "2",
-    type: "RECEIVE" as const,
-    username: "nashirjamali",
-    amount: "1.0",
-    token: "CDT",
-    timestamp: "2025-01-01",
-    isPrivate: false,
-  },
-];
 
 export default function DashboardPage() {
   const { username, totalBalance, isLoading, assets, shouldRender } =
     useDashboard();
+  const {
+    transactions,
+    isLoading: transactionsLoading,
+    error,
+  } = useTransactionHistory();
 
   if (!shouldRender) {
     return null;
@@ -50,7 +35,11 @@ export default function DashboardPage() {
 
       <PersonalLinkCard username={username || "username"} />
 
-      <TransactionHistorySection activities={SAMPLE_ACTIVITIES} />
+      <TransactionHistorySection
+        transactions={transactions}
+        isLoading={transactionsLoading}
+        error={error}
+      />
     </div>
   );
 }

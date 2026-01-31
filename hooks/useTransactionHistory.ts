@@ -6,6 +6,7 @@ import { useBaseProvider } from "@/hooks/useBlockchain";
 import { useWallet } from "@/hooks/useWallet";
 import {
   scanForIncomingTransfers,
+  scanForOutgoingTransfers,
   parseMetadata,
   type AnnouncementEvent,
 } from "@/lib/blockchain";
@@ -86,7 +87,9 @@ function getDateGroup(timestamp: number): string {
 
 async function convertAnnouncementToTransaction(
   event: AnnouncementEvent,
-  provider: ReturnType<typeof useBaseProvider>
+  provider: ReturnType<typeof useBaseProvider>,
+  callerAddress: string,
+  transactionType: "SEND" | "RECEIVE"
 ): Promise<Transaction | null> {
   if (!provider) {
     return null;
@@ -95,9 +98,14 @@ async function convertAnnouncementToTransaction(
   try {
     const metadata = parseMetadata(event.metadata);
 
+    const addressToLookup =
+      transactionType === "SEND"
+        ? event.stealthAddress
+        : event.actor || event.sender;
+
     let username: string | null = null;
     try {
-      username = await getUsername(provider, event.sender);
+      username = await getUsername(provider, addressToLookup);
 
       if (username && username.trim() !== "") {
       } else {
@@ -110,7 +118,7 @@ async function convertAnnouncementToTransaction(
     const displayUsername =
       username && username.trim() !== ""
         ? username.replace(/^@+/, "")
-        : event.sender.slice(0, 6) + "..." + event.sender.slice(-4);
+        : addressToLookup.slice(0, 6) + "..." + addressToLookup.slice(-4);
 
     const validTimestamp =
       event.timestamp > 0 ? event.timestamp : Math.floor(Date.now() / 1000);
@@ -127,8 +135,8 @@ async function convertAnnouncementToTransaction(
     const token = tokenSymbol.toUpperCase();
 
     const transaction = {
-      id: event.transactionHash,
-      type: "RECEIVE" as const,
+      id: `${event.transactionHash}-${transactionType}`,
+      type: transactionType,
       username: displayUsername,
       amount: amount,
       token: token,
@@ -137,7 +145,7 @@ async function convertAnnouncementToTransaction(
       isPrivate: true,
       dateGroup: getDateGroup(validTimestamp),
       transactionHash: event.transactionHash,
-      sender: event.sender,
+      sender: event.actor || event.sender,
       stealthAddress: event.stealthAddress,
     };
 
@@ -193,15 +201,20 @@ export function useTransactionHistory(): {
         return;
       }
 
-      const events = await scanForIncomingTransfers(
-        provider,
-        viewingKeyPrivate
-      );
+      const [incomingEvents, outgoingEvents] = await Promise.all([
+        scanForIncomingTransfers(provider, viewingKeyPrivate),
+        scanForOutgoingTransfers(provider, address),
+      ]);
 
-      const convertedTransactions = await Promise.all(
-        events.map(async (event) => {
+      const incomingTransactions = await Promise.all(
+        incomingEvents.map(async (event) => {
           try {
-            const tx = await convertAnnouncementToTransaction(event, provider);
+            const tx = await convertAnnouncementToTransaction(
+              event,
+              provider,
+              address,
+              "RECEIVE"
+            );
             return tx;
           } catch {
             return null;
@@ -209,11 +222,44 @@ export function useTransactionHistory(): {
         })
       );
 
+      const outgoingTransactions = await Promise.all(
+        outgoingEvents.map(async (event) => {
+          try {
+            const tx = await convertAnnouncementToTransaction(
+              event,
+              provider,
+              address,
+              "SEND"
+            );
+            return tx;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      const convertedTransactions = [
+        ...incomingTransactions,
+        ...outgoingTransactions,
+      ];
+
       const validTransactions = convertedTransactions.filter(
         (tx): tx is Transaction => tx !== null
       );
 
-      const sortedTransactions = validTransactions.sort(
+      const uniqueTransactions = validTransactions.reduce((acc, tx) => {
+        const existingIndex = acc.findIndex(
+          (existing) =>
+            existing.transactionHash === tx.transactionHash &&
+            existing.type === tx.type
+        );
+        if (existingIndex === -1) {
+          acc.push(tx);
+        }
+        return acc;
+      }, [] as Transaction[]);
+
+      const sortedTransactions = uniqueTransactions.sort(
         (a, b) => b.timestampNumber - a.timestampNumber
       );
 

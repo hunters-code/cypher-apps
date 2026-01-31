@@ -16,6 +16,7 @@ export interface AnnouncementEvent {
   blockNumber: number;
   timestamp: number;
   transactionHash: string;
+  actor?: string;
 }
 
 export interface ParsedMetadata {
@@ -97,7 +98,8 @@ async function fetchTransactionLogs(
 }
 
 async function fetchTransactionsFromBlockscout(
-  address: string
+  address: string,
+  filterType: "incoming" | "outgoing" = "incoming"
 ): Promise<BlockscoutTransaction[]> {
   const blockscoutUrl = getBlockscoutUrl();
 
@@ -120,12 +122,18 @@ async function fetchTransactionsFromBlockscout(
     const transactionsWithLogs: BlockscoutTransaction[] = [];
 
     for (const tx of allTransactions) {
-      if (!tx.to || tx.to.hash.toLowerCase() !== address.toLowerCase()) {
+      if (tx.method !== "announce") {
         continue;
       }
 
-      if (tx.method !== "announce") {
-        continue;
+      if (filterType === "incoming") {
+        if (!tx.to || tx.to.hash.toLowerCase() !== address.toLowerCase()) {
+          continue;
+        }
+      } else {
+        if (!tx.from || tx.from.hash.toLowerCase() !== address.toLowerCase()) {
+          continue;
+        }
       }
 
       const logs = await fetchTransactionLogs(blockscoutUrl, tx.hash);
@@ -376,8 +384,10 @@ export async function scanForIncomingTransfers(
   viewingKeyPrivate: string
 ): Promise<AnnouncementEvent[]> {
   try {
-    const transactions =
-      await fetchTransactionsFromBlockscout(ANNOUNCEMENT_ADDRESS);
+    const transactions = await fetchTransactionsFromBlockscout(
+      ANNOUNCEMENT_ADDRESS,
+      "incoming"
+    );
 
     const matchingEvents: AnnouncementEvent[] = [];
 
@@ -425,9 +435,65 @@ export async function scanForIncomingTransfers(
         if (matchesEvent || matchesSender) {
           matchingEvents.push({
             ...event,
+            actor: tx.from?.hash,
             stealthAddress: computedStealthAddress,
           });
         }
+      }
+    }
+
+    return matchingEvents;
+  } catch {
+    return [];
+  }
+}
+
+export async function scanForOutgoingTransfers(
+  provider: ethers.Provider,
+  senderAddress: string
+): Promise<AnnouncementEvent[]> {
+  try {
+    const transactions = await fetchTransactionsFromBlockscout(
+      senderAddress,
+      "outgoing"
+    );
+
+    const matchingEvents: AnnouncementEvent[] = [];
+
+    for (const tx of transactions) {
+      const blockNumber = tx.block_number;
+      const timestamp = tx.timestamp;
+
+      if (!tx.logs || tx.logs.length === 0) {
+        continue;
+      }
+
+      for (const log of tx.logs) {
+        const logAddress =
+          typeof log.address === "string"
+            ? log.address
+            : log.address?.hash || "";
+
+        if (logAddress.toLowerCase() !== ANNOUNCEMENT_ADDRESS.toLowerCase()) {
+          continue;
+        }
+
+        const event = decodeAnnouncementEvent(
+          log,
+          tx.hash,
+          blockNumber,
+          timestamp,
+          tx.decoded_input
+        );
+
+        if (!event) {
+          continue;
+        }
+
+        matchingEvents.push({
+          ...event,
+          actor: tx.from?.hash,
+        });
       }
     }
 
