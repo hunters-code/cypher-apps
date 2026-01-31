@@ -17,16 +17,29 @@ import {
   ItemActions,
   ItemSeparator,
 } from "@/components/ui/item";
+import { useWallet } from "@/hooks/useWallet";
 import { ROUTES } from "@/lib/constants/routes";
-import { hasSession, clearSession } from "@/lib/utils/session";
+import {
+  hasSession,
+  clearSession,
+  getSessionUsername,
+} from "@/lib/utils/session";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [_notificationsEnabled, _setNotificationsEnabled] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedUsername, setCopiedUsername] = useState(false);
+  const [username] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return (
+      getSessionUsername() ?? localStorage.getItem("cypher_username") ?? null
+    );
+  });
 
   const { logout, authenticated, ready } = usePrivy();
+  const { address, walletAddress: privyWalletAddress } = useWallet();
+
+  const walletAddress = address ?? privyWalletAddress ?? null;
 
   useEffect(() => {
     if (ready && (!authenticated || !hasSession())) {
@@ -34,23 +47,23 @@ export default function SettingsPage() {
     }
   }, [ready, authenticated, router]);
 
-  const username = "@nashirjamali";
-  const walletAddress = "0x9a3d6c5f8e2b1a7c4d9e8f3b2a1c6d5e4f3a2b1c";
-
   const handleCopyAddress = async () => {
+    if (!walletAddress) return;
     await navigator.clipboard.writeText(walletAddress);
     setCopiedAddress(true);
     setTimeout(() => setCopiedAddress(false), 2000);
   };
 
   const handleCopyUsername = async () => {
+    if (!username) return;
     await navigator.clipboard.writeText(username);
     setCopiedUsername(true);
     setTimeout(() => setCopiedUsername(false), 2000);
   };
 
-  const formatAddress = (address: string): string => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const formatAddress = (addr: string): string => {
+    if (addr.length < 10) return addr;
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   const handleLogout = async () => {
@@ -75,56 +88,67 @@ export default function SettingsPage() {
               <h2 className="text-lg font-semibold text-foreground">Account</h2>
               <Item
                 variant="default"
-                className="cursor-pointer hover:bg-muted/50 w-full"
-                onClick={handleCopyUsername}
+                className={
+                  username
+                    ? "cursor-pointer hover:bg-muted/50 w-full"
+                    : "w-full opacity-80"
+                }
+                onClick={username ? handleCopyUsername : undefined}
               >
                 <ItemMedia variant="icon">
                   <User className="h-4 w-4 text-primary" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle className="text-left">{username}</ItemTitle>
+                  <ItemTitle className="text-left">{username ?? "—"}</ItemTitle>
                   <ItemDescription className="text-left">
                     Username
                   </ItemDescription>
                 </ItemContent>
                 <ItemActions>
-                  {copiedUsername ? (
-                    <Check className="h-4 w-4 text-primary" />
-                  ) : (
-                    <Copy className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {username &&
+                    (copiedUsername ? (
+                      <Check className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-muted-foreground" />
+                    ))}
                 </ItemActions>
               </Item>
               <ItemSeparator />
               <Item
                 variant="default"
-                className="cursor-pointer hover:bg-muted/50 w-full"
-                onClick={handleCopyAddress}
+                className={
+                  walletAddress
+                    ? "cursor-pointer hover:bg-muted/50 w-full"
+                    : "w-full opacity-80"
+                }
+                onClick={walletAddress ? handleCopyAddress : undefined}
               >
                 <ItemMedia variant="icon">
                   <Wallet className="h-4 w-4 text-primary" />
                 </ItemMedia>
                 <ItemContent>
                   <ItemTitle className="text-left">
-                    {formatAddress(walletAddress)}
+                    {walletAddress ? formatAddress(walletAddress) : "—"}
                   </ItemTitle>
                   <ItemDescription className="text-left">
                     Wallet Address
                   </ItemDescription>
                 </ItemContent>
                 <ItemActions>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={handleCopyAddress}
-                  >
-                    {copiedAddress ? (
-                      <Check className="h-4 w-4 text-primary" />
-                    ) : (
-                      <Copy className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </Button>
+                  {walletAddress && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={handleCopyAddress}
+                    >
+                      {copiedAddress ? (
+                        <Check className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  )}
                 </ItemActions>
               </Item>
             </div>
