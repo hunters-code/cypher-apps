@@ -133,7 +133,7 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto flex max-w-4xl flex-col gap-6 w-full px-4 py-8">
+        <div className="mx-auto flex max-w-5xl flex-col gap-6 w-full px-4 py-8">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-foreground">
               Transaction History
@@ -267,7 +267,7 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-4xl shrink-0 border-t border-border bg-background px-4 py-4">
+      <div className="mx-auto w-full max-w-5xl shrink-0 border-t border-border bg-background px-4 py-4">
         <div className="flex flex-col gap-3">
           <Button variant="outline" className="w-full" onClick={handleBack}>
             Back

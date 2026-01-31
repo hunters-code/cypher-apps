@@ -36,7 +36,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 md:px-8 md:py-8 lg:px-10">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 md:px-8 md:py-8 lg:px-10">
       <h1 className="text-center font-urbanist text-2xl font-bold text-foreground md:text-left md:text-3xl">
         Dashboard
       </h1>

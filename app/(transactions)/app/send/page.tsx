@@ -154,7 +154,7 @@ export default function SendPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col justify-between gap-6 px-4 py-6 md:px-8 md:py-8">
       <div className="flex flex-col gap-6 w-full">
         <div>
           <h1 className="font-urbanist text-2xl font-bold text-foreground md:text-3xl">
