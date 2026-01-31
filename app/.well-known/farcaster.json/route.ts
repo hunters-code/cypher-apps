@@ -37,7 +37,7 @@ export async function GET() {
         "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
       ogImageUrl:
         "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Hero-Image.jpg",
-      noindex: true,
+      noindex: false,
     },
   };
 
