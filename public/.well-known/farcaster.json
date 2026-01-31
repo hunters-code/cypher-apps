@@ -8,24 +8,23 @@
     "version": "1",
     "name": "Cypher Wallet",
     "homeUrl": "https://cypher-apps.vercel.app",
-    "iconUrl": "https://cypher-apps.vercel.app/embed-image.png",
-    "splashImageUrl": "https://cypher-apps.vercel.app/splash-image.png",
+    "iconUrl": "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Logo.jpg",
+    "splashImageUrl": "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Logo.jpg",
     "splashBackgroundColor": "#000000",
     "webhookUrl": "https://cypher-apps.vercel.app/api/webhook",
     "subtitle": "Private crypto wallet",
     "description": "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
     "screenshotUrls": [
-      "https://cypher-apps.vercel.app/s1.png",
-      "https://cypher-apps.vercel.app/s2.png",
-      "https://cypher-apps.vercel.app/s3.png"
+      "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Preview-1.jpg",
+      "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Preview-2.jpg"
     ],
     "primaryCategory": "finance",
     "tags": ["crypto", "wallet", "privacy", "baseapp"],
-    "heroImageUrl": "https://cypher-apps.vercel.app/embed-image.png",
+    "heroImageUrl": "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Hero-Image.jpg",
     "tagline": "Your crypto, truly private",
     "ogTitle": "Cypher Wallet",
     "ogDescription": "Your crypto, truly private. Enjoy cash-level privacy on the blockchain.",
-    "ogImageUrl": "https://cypher-apps.vercel.app/embed-image.png",
+    "ogImageUrl": "https://raw.githubusercontent.com/hunters-code/cypher-apps/refs/heads/main/previews/Cypher-Hero-Image.jpg",
     "noindex": true
   }
 }
