@@ -54,8 +54,7 @@ export async function getSigner(): Promise<ethers.JsonRpcSigner | null> {
       );
       const signer = await provider.getSigner();
       return signer;
-    } catch {
-    }
+    } catch {}
   }
 
   return null;

@@ -34,9 +34,35 @@ export default function ScanPage() {
             isScannerRunningRef.current = false;
             html5QrCode.stop().catch(() => {});
 
-            if (decodedText.startsWith("@") || decodedText.startsWith("0x")) {
+            // Handle username (@...) - primary method for CDT
+            if (decodedText.startsWith("@")) {
               router.push(
-                `${ROUTES.SEND}?recipient=${encodeURIComponent(decodedText)}`
+                `${ROUTES.SEND}?recipient=${encodeURIComponent(decodedText)}&token=CDT`
+              );
+            }
+            // Handle wallet address (0x...) - fallback, default to CDT token
+            else if (
+              decodedText.startsWith("0x") &&
+              decodedText.length === 42
+            ) {
+              router.push(
+                `${ROUTES.SEND}?recipient=${encodeURIComponent(decodedText)}&token=CDT`
+              );
+            }
+            // Handle plain username without @ prefix
+            else if (
+              !decodedText.startsWith("0x") &&
+              !/^[a-fA-F0-9]{40}$/.test(decodedText)
+            ) {
+              // Assume it's a username
+              router.push(
+                `${ROUTES.SEND}?recipient=${encodeURIComponent(`@${decodedText}`)}&token=CDT`
+              );
+            }
+            // Handle plain address without 0x prefix
+            else if (/^[a-fA-F0-9]{40}$/.test(decodedText)) {
+              router.push(
+                `${ROUTES.SEND}?recipient=${encodeURIComponent(`0x${decodedText}`)}&token=CDT`
               );
             }
           },
@@ -67,8 +93,30 @@ export default function ScanPage() {
   }, [router]);
 
   const handleScanned = (data: string) => {
-    if (data.startsWith("@") || data.startsWith("0x")) {
-      router.push(`${ROUTES.SEND}?recipient=${encodeURIComponent(data)}`);
+    // Handle username (@...) - primary method for CDT
+    if (data.startsWith("@")) {
+      router.push(
+        `${ROUTES.SEND}?recipient=${encodeURIComponent(data)}&token=CDT`
+      );
+    }
+    // Handle wallet address (0x...) - fallback, default to CDT token
+    else if (data.startsWith("0x") && data.length === 42) {
+      router.push(
+        `${ROUTES.SEND}?recipient=${encodeURIComponent(data)}&token=CDT`
+      );
+    }
+    // Handle plain username without @ prefix
+    else if (!data.startsWith("0x") && !/^[a-fA-F0-9]{40}$/.test(data)) {
+      // Assume it's a username
+      router.push(
+        `${ROUTES.SEND}?recipient=${encodeURIComponent(`@${data}`)}&token=CDT`
+      );
+    }
+    // Handle plain address without 0x prefix
+    else if (/^[a-fA-F0-9]{40}$/.test(data)) {
+      router.push(
+        `${ROUTES.SEND}?recipient=${encodeURIComponent(`0x${data}`)}&token=CDT`
+      );
     }
   };
 

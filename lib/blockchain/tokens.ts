@@ -120,10 +120,7 @@ export async function getStealthAddresses(
   viewingKeyPrivate: string
 ): Promise<string[]> {
   try {
-    const events = await scanForIncomingTransfers(
-      provider,
-      viewingKeyPrivate
-    );
+    const events = await scanForIncomingTransfers(provider, viewingKeyPrivate);
 
     const stealthAddresses = new Set<string>();
     events.forEach((event) => {
@@ -164,8 +161,7 @@ export async function getTokenBalanceWithStealth(
         } else {
           totalBalance += ethers.parseUnits(balance, tokenInfo.decimals);
         }
-      } catch {
-      }
+      } catch {}
     })
   );
 
@@ -185,10 +181,7 @@ export async function getMultipleTokenBalancesWithStealth(
 
   let stealthAddresses: string[] = [];
   if (viewingKeyPrivate) {
-    stealthAddresses = await getStealthAddresses(
-      provider,
-      viewingKeyPrivate
-    );
+    stealthAddresses = await getStealthAddresses(provider, viewingKeyPrivate);
   }
 
   await Promise.all(

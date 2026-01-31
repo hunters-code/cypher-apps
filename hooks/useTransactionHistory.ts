@@ -94,11 +94,11 @@ async function convertAnnouncementToTransaction(
 
   try {
     const metadata = parseMetadata(event.metadata);
-    
+
     let username: string | null = null;
     try {
       username = await getUsername(provider, event.sender);
-      
+
       if (username && username.trim() !== "") {
       } else {
         username = null;
@@ -106,17 +106,24 @@ async function convertAnnouncementToTransaction(
     } catch {
       username = null;
     }
-    
-    const displayUsername = username && username.trim() !== ""
-      ? username.replace(/^@+/, "")
-      : event.sender.slice(0, 6) + "..." + event.sender.slice(-4);
-    
-    const validTimestamp = event.timestamp > 0 ? event.timestamp : Math.floor(Date.now() / 1000);
+
+    const displayUsername =
+      username && username.trim() !== ""
+        ? username.replace(/^@+/, "")
+        : event.sender.slice(0, 6) + "..." + event.sender.slice(-4);
+
+    const validTimestamp =
+      event.timestamp > 0 ? event.timestamp : Math.floor(Date.now() / 1000);
 
     const metadataObj = metadata as Record<string, unknown>;
-    const amount = (typeof metadataObj.amount === "string" ? metadataObj.amount : "0");
-    const tokenSymbol = (typeof metadataObj.tokenSymbol === "string" ? metadataObj.tokenSymbol : 
-                        (typeof metadataObj.token === "string" ? metadataObj.token : "ETH"));
+    const amount =
+      typeof metadataObj.amount === "string" ? metadataObj.amount : "0";
+    const tokenSymbol =
+      typeof metadataObj.tokenSymbol === "string"
+        ? metadataObj.tokenSymbol
+        : typeof metadataObj.token === "string"
+          ? metadataObj.token
+          : "ETH";
     const token = tokenSymbol.toUpperCase();
 
     const transaction = {
@@ -133,7 +140,7 @@ async function convertAnnouncementToTransaction(
       sender: event.sender,
       stealthAddress: event.stealthAddress,
     };
-    
+
     return transaction;
   } catch {
     return null;

@@ -68,11 +68,13 @@ interface BlockscoutResponse {
 async function fetchTransactionLogs(
   blockscoutUrl: string,
   txHash: string
-): Promise<Array<{
-  address: string | { hash: string };
-  topics: string[];
-  data: string;
-}>> {
+): Promise<
+  Array<{
+    address: string | { hash: string };
+    topics: string[];
+    data: string;
+  }>
+> {
   try {
     const response = await fetch(
       `${blockscoutUrl}/api/v2/transactions/${txHash}/logs`,
@@ -96,13 +98,12 @@ async function fetchTransactionLogs(
 
 async function fetchTransactionsFromBlockscout(
   address: string
-): Promise<BlockscoutTransaction[]>
-{
+): Promise<BlockscoutTransaction[]> {
   const blockscoutUrl = getBlockscoutUrl();
 
   try {
     const url = `${blockscoutUrl}/api/v2/addresses/${address}/transactions`;
-    
+
     const response = await fetch(url, {
       headers: {
         accept: "application/json",
@@ -168,7 +169,7 @@ function decodeAnnouncementEvent(
     );
 
     const iface = announcementContract.interface;
-    
+
     let decodedLog: ethers.Result;
     let announcementEventFragment: ethers.EventFragment | null = null;
 
@@ -176,7 +177,7 @@ function decodeAnnouncementEvent(
       announcementEventFragment = iface.getEvent("Announcement");
       if (announcementEventFragment) {
         const eventTopic = announcementEventFragment.topicHash;
-        
+
         if (actualTopic === eventTopic) {
           decodedLog = iface.decodeEventLog(
             announcementEventFragment,
@@ -195,14 +196,14 @@ function decodeAnnouncementEvent(
       }
 
       const sender = ethers.getAddress("0x" + log.topics[1].slice(26));
-      
+
       let stealthAddressStr = "";
       if (log.topics[2]) {
         stealthAddressStr = ethers.getAddress("0x" + log.topics[2].slice(26));
       } else {
         return null;
       }
-      
+
       let ephemeralPublicKeyFromInput = "";
       if (transactionInput?.parameters) {
         const ephemeralParam = transactionInput.parameters.find(
@@ -215,16 +216,20 @@ function decodeAnnouncementEvent(
 
       let ephemeralPublicKey = ephemeralPublicKeyFromInput || "0x";
       let metadata = "0x";
-      
+
       if (transactionInput?.parameters) {
         const metadataParam = transactionInput.parameters.find(
           (p) => p.name === "metadata"
         );
-        if (metadataParam && metadataParam.value && metadataParam.value !== "0x") {
+        if (
+          metadataParam &&
+          metadataParam.value &&
+          metadataParam.value !== "0x"
+        ) {
           metadata = metadataParam.value;
         }
       }
-      
+
       let blockNumberFromEvent = blockNumber;
 
       if (!ephemeralPublicKey || ephemeralPublicKey === "0x") {
@@ -313,8 +318,7 @@ function decodeAnnouncementEvent(
               }
             }
           }
-        } catch {
-        }
+        } catch {}
       }
 
       return {
@@ -372,26 +376,25 @@ export async function scanForIncomingTransfers(
   viewingKeyPrivate: string
 ): Promise<AnnouncementEvent[]> {
   try {
-    const transactions = await fetchTransactionsFromBlockscout(
-      ANNOUNCEMENT_ADDRESS
-    );
+    const transactions =
+      await fetchTransactionsFromBlockscout(ANNOUNCEMENT_ADDRESS);
 
     const matchingEvents: AnnouncementEvent[] = [];
 
     for (const tx of transactions) {
       const blockNumber = tx.block_number;
       const timestamp = tx.timestamp;
-      
+
       if (!tx.logs || tx.logs.length === 0) {
         continue;
       }
-      
+
       for (const log of tx.logs) {
         const logAddress =
           typeof log.address === "string"
             ? log.address
             : log.address?.hash || "";
-        
+
         if (logAddress.toLowerCase() !== ANNOUNCEMENT_ADDRESS.toLowerCase()) {
           continue;
         }
@@ -403,19 +406,22 @@ export async function scanForIncomingTransfers(
           timestamp,
           tx.decoded_input
         );
-        
+
         if (!event) {
           continue;
         }
-        
+
         const computedStealthAddress = computeStealthAddress(
           viewingKeyPrivate,
           event.ephemeralPublicKey
         );
-        
-        const matchesEvent = computedStealthAddress.toLowerCase() === event.stealthAddress.toLowerCase();
-        const matchesSender = computedStealthAddress.toLowerCase() === event.sender.toLowerCase();
-        
+
+        const matchesEvent =
+          computedStealthAddress.toLowerCase() ===
+          event.stealthAddress.toLowerCase();
+        const matchesSender =
+          computedStealthAddress.toLowerCase() === event.sender.toLowerCase();
+
         if (matchesEvent || matchesSender) {
           matchingEvents.push({
             ...event,

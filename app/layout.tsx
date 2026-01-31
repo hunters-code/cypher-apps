@@ -1,6 +1,7 @@
+import { Urbanist } from "next/font/google";
 import localFont from "next/font/local";
 
-import { MobileContainer } from "@/components/layout/mobile-container";
+import { LandingLayoutWrapper } from "@/components/layout/landing-layout-wrapper";
 import { MetaTags } from "@/components/meta-tags";
 import { MiniAppProvider } from "@/components/miniapp-provider";
 import { AuthProvider } from "@/providers/AuthProvider";
@@ -67,6 +68,11 @@ const satoshi = localFont({
   display: "swap",
 });
 
+const urbanist = Urbanist({
+  variable: "--font-urbanist",
+  subsets: ["latin"],
+});
+
 export async function generateMetadata(): Promise<Metadata> {
   const appUrl =
     process.env.NEXT_PUBLIC_URL || "https://cypher-apps.vercel.app";
@@ -107,14 +113,14 @@ export default function RootLayout({
         <meta name="base:app_id" content="6952106ac63ad876c90817b6" />
       </head>
       <body
-        className={`${satoshi.variable} font-sans antialiased`}
+        className={`${satoshi.variable} ${urbanist.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <MetaTags />
         <PrivyProvider>
           <AuthProvider>
             <MiniAppProvider>
-              <MobileContainer>{children}</MobileContainer>
+              <LandingLayoutWrapper>{children}</LandingLayoutWrapper>
             </MiniAppProvider>
           </AuthProvider>
         </PrivyProvider>

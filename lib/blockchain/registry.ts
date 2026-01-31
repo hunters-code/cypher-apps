@@ -50,11 +50,11 @@ export async function getUsername(
     );
 
     const username = await registry.getUsername(address);
-    
+
     if (username && typeof username === "string" && username.trim() !== "") {
       return username;
     }
-    
+
     return "";
   } catch (error) {
     if (error instanceof Error) {

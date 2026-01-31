@@ -87,8 +87,7 @@ function SendConfirmContent() {
               message: `Private transfer to ${recipient}`,
             }
           );
-        } catch {
-        }
+        } catch {}
       } else {
         let toAddress: string;
 

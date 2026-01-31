@@ -10,17 +10,24 @@ import { Search, ChevronDown, RefreshCw } from "lucide-react";
 import { RecentActivityItem } from "@/components/transaction/RecentActivityItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  useTransactionHistory,
+  type Transaction,
+} from "@/hooks/useTransactionHistory";
 import { ROUTES } from "@/lib/constants/routes";
 import { hasSession } from "@/lib/utils/session";
-import { useTransactionHistory, type Transaction } from "@/hooks/useTransactionHistory";
 
 const ITEMS_PER_PAGE = 5;
 
 export default function HistoryPage() {
   const router = useRouter();
   const { authenticated, ready } = usePrivy();
-  const { transactions: allTransactions, isLoading, error, refetch } =
-    useTransactionHistory();
+  const {
+    transactions: allTransactions,
+    isLoading,
+    error,
+    refetch,
+  } = useTransactionHistory();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("All Types");
   const [selectedToken, setSelectedToken] = useState<string>("All Tokens");
@@ -77,7 +84,7 @@ export default function HistoryPage() {
   useEffect(() => {
     if (prevFilterKeyRef.current !== filterKey) {
       prevFilterKeyRef.current = filterKey;
-      setDisplayedCount(ITEMS_PER_PAGE);
+      queueMicrotask(() => setDisplayedCount(ITEMS_PER_PAGE));
     }
   }, [filterKey]);
 
@@ -237,9 +244,7 @@ export default function HistoryPage() {
 
               {filteredTransactions.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <p className="text-muted-foreground">
-                    No transactions found
-                  </p>
+                  <p className="text-muted-foreground">No transactions found</p>
                   <p className="text-sm text-muted-foreground mt-2">
                     {searchQuery ||
                     selectedType !== "All Types" ||
